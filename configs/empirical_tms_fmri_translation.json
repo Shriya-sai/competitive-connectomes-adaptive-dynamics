@@ -45,6 +45,17 @@
     "response_extent": "fraction of remote parcels with absolute parcel-mean z >= 3.1",
     "conditional_propagation": "estimated across participant-site observations by including local response as a covariate"
   },
+  "resting_functional_embedding": {
+    "status": "frozen_before_processed_resting_BOLD_inspection",
+    "connectivity": "Pearson correlation among cleaned Schaefer-100 parcel time series with diagonal set to zero",
+    "target_parcel": "unique Schaefer parcel with maximum voxel overlap with released stimulation sphere",
+    "positive_strength": "sum of positive off-diagonal correlations",
+    "negative_strength": "sum of absolute negative off-diagonal correlations",
+    "total_absolute_strength": "positive strength plus negative strength",
+    "mixed_sign_strength": "square root of positive strength times negative strength",
+    "global_signal_regression": "mandatory parallel sensitivity analysis using the cleaned whole-brain global signal",
+    "confirmatory_predictors": "positive strength, negative strength, and their explicit interaction"
+  },
   "primary_predictions": [
     "negative and mixed-sign resting functional embedding predict absolute remote TMS-evoked propagation conditional on local response",
     "lower total absolute embedding predicts greater local susceptibility",

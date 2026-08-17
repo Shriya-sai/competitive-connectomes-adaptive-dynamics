@@ -65,6 +65,22 @@ For each participant:
 
 Architecture must be estimated only from rest—not from the TMS run being predicted.
 
+### Frozen embedding definitions
+
+Resting functional connectivity is the Pearson correlation matrix among the
+cleaned Schaefer-100 parcel time series, with the diagonal set to zero. The
+target is the unique parcel having the greatest voxel overlap with the released
+stimulation sphere. Positive embedding is the sum of its positive
+off-diagonal correlations; negative embedding is the sum of the absolute
+values of its negative correlations; total absolute embedding is their sum;
+and mixed-sign embedding is their geometric mean. The geometric mean is
+descriptive and becomes zero if either signed component is absent. Confirmatory
+models retain positive strength, negative strength and their explicit
+interaction rather than replacing them with the mixed score. All quantities
+are recomputed in a mandatory analysis that regresses the cleaned whole-brain
+global signal from parcel time series. Negative correlation remains a
+functional statistical relationship, not evidence of direct inhibition.
+
 ## TMS response outcomes
 
 For each participant × stimulation-site run, fit an event-related BOLD model using the recorded pulse timings.
