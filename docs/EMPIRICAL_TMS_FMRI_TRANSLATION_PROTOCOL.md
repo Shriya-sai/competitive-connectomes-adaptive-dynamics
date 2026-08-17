@@ -90,6 +90,22 @@ fMRIPrep motion outliers or framewise displacement above 0.5 mm. The empirical
 voxelwise fit will use an AR(1) noise model. The design must be full-rank and
 must pass the synthetic known-effect recovery test before empirical fitting.
 
+### Frozen spatial response instrument
+
+The released binary stimulation sphere defines the local ROI. Local
+susceptibility is the absolute value of its mean signed beta, with the signed
+mean retained. Remote propagation is calculated in the Schaefer 2018
+100-parcel, seven-network atlas at 2 mm resolution, matching the number of Hopf
+regions without implying parcel identity. Any parcel touching the stimulation
+sphere or a further 10 mm Euclidean buffer is excluded to prevent spatial
+spillover from being labeled propagation. Each remaining parcel receives equal
+weight; the primary measure is mean absolute parcel beta, with positive beta
+and negative-beta magnitude retained separately. Response extent is secondary
+and equals the fraction of remote parcels whose absolute parcel-mean z score is
+at least 3.1. Propagation conditional on local response is not a single-map
+quantity: it will be estimated across participant-site observations by adding
+local susceptibility as a covariate.
+
 ## Primary statistical model
 
 The observational unit is participant × stimulation site. Use a hierarchical model or an equivalent mixed-effects regression:

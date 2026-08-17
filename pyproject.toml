@@ -17,6 +17,7 @@ dependencies = [
     "numpy",
     "pandas>=2.2,<3",
     "scipy",
+    "templateflow>=24,<25",
 ]
 
 [project.optional-dependencies]

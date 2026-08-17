@@ -34,6 +34,17 @@
     "serial_correlation_model_for_empirical_fit": "ar1",
     "pulse_specific_effects": false
   },
+  "spatial_response_instrument": {
+    "status": "frozen_before_processed_BOLD_inspection",
+    "parcellation": "Schaefer 2018, 100 parcels, 7 networks, 2 mm",
+    "local_roi": "released binary stimulation sphere for each site",
+    "local_susceptibility": "absolute value of mean signed beta within stimulation sphere",
+    "remote_exclusion_buffer_mm": 10.0,
+    "remote_propagation": "equal-weighted mean absolute parcel beta outside buffered local field",
+    "signed_remote_components": "equal-weighted positive beta and negative-beta magnitude retained separately",
+    "response_extent": "fraction of remote parcels with absolute parcel-mean z >= 3.1",
+    "conditional_propagation": "estimated across participant-site observations by including local response as a covariate"
+  },
   "primary_predictions": [
     "negative and mixed-sign resting functional embedding predict absolute remote TMS-evoked propagation conditional on local response",
     "lower total absolute embedding predicts greater local susceptibility",
