@@ -15,3 +15,16 @@
 - Default behavior: unchanged; omitting the argument still uses upstream seed `42`.
 - Reason: the upstream simulator hard-codes seed 42, so repeated simulations of a frozen GC are identical. Seed control is required to estimate stochastic forward-simulation variability and construct fair null distributions.
 - Scientific impact: this is an experimental extension. Reproduction runs retain seed 42; uncertainty analyses must record all seeds explicitly.
+
+## Paired perturbation simulator
+
+- Files: `cpp/hopf_simulation.hpp` and `cpp/hopf_python_interface.cpp`
+- Change: added a segment-wise local bifurcation-parameter shift and a Python
+  entry point returning matched control/intervention trajectories initialized
+  from the same post-burn-in state and driven by identical stochastic noise.
+- Reason: perturbational effects must be distinguished from ordinary divergence
+  between independently simulated noisy trajectories.
+- Scientific impact: this is a project-specific experimental extension and is
+  not part of the Luppi et al. reproduction.
+
+The machine-applicable patch is stored in `configs/upstream_compatibility.patch`.

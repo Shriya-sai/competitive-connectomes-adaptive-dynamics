@@ -1,0 +1,209 @@
+diff --git a/cpp/build_hopf.py b/cpp/build_hopf.py
+index 76ec65b..264e61f 100644
+--- a/cpp/build_hopf.py
++++ b/cpp/build_hopf.py
+@@ -10,7 +10,7 @@ import shutil
+ import numpy
+ import platform
+ import subprocess
+-from distutils.core import setup, Extension
++from setuptools import setup, Extension
+ 
+ 
+ def find_project_root():
+diff --git a/cpp/hopf_config.hpp b/cpp/hopf_config.hpp
+index ee54566..917cfd8 100644
+--- a/cpp/hopf_config.hpp
++++ b/cpp/hopf_config.hpp
+@@ -42,6 +42,7 @@ public:
+     double a{-0.02};                            // Damping parameter (default: -0.02)
+     int burnin_steps{3000};                     // Burn-in period (default: 3000 time units)
+     Noise noise{Noise::NOISE_NORMAL};           // Noise type
++    unsigned int random_seed{42};               // Reproducible stochastic-noise seed
+ 
+     // === OPTIMIZATION PARAMETERS ===
+     double learning_rate_FC{0.0002};            // Learning rate for FC error
+@@ -144,4 +145,4 @@ public:
+         // Update sum_C after changes
+         update_sum_C();
+     }
+-};
+\ No newline at end of file
++};
+diff --git a/cpp/hopf_python_interface.cpp b/cpp/hopf_python_interface.cpp
+index e0bba42..7433ee6 100644
+--- a/cpp/hopf_python_interface.cpp
++++ b/cpp/hopf_python_interface.cpp
+@@ -69,13 +69,14 @@ static PyObject* hopf_simulate(PyObject* self, PyObject* args) {
+     PyObject* GEC_py;
+     PyObject* frequencies_py;
+     int T, noise_type;
++    unsigned int random_seed = 42;
+     double TR, sigma, a;
+     int matlab_burnin = 0;  // Default: performance mode
+     
+-    if (!PyArg_ParseTuple(args, "OOiddd|i", 
+-                          &GEC_py, &frequencies_py, &T, &TR, &sigma, &a, &noise_type)) {
++    if (!PyArg_ParseTuple(args, "OOiddd|iI", 
++                          &GEC_py, &frequencies_py, &T, &TR, &sigma, &a, &noise_type, &random_seed)) {
+         PyErr_SetString(PyExc_TypeError, 
+-            "Expected: GEC(NxN), frequencies(N), T(int), TR(float), sigma(float), a(float), [noise_type(int)]");
++            "Expected: GEC(NxN), frequencies(N), T(int), TR(float), sigma(float), a(float), [noise_type(int), random_seed(uint)]");
+         return NULL;
+     }
+     
+@@ -103,6 +104,7 @@ static PyObject* hopf_simulate(PyObject* self, PyObject* args) {
+         config.sigma = sigma;
+         config.a = a;
+         config.noise = static_cast<HopfConfig::Noise>(noise_type);
++        config.random_seed = random_seed;
+         config.matlab_compatible_burnin = (matlab_burnin != 0);
+         config.gec_matrix = GEC;
+         config.regional_frequencies = frequencies;
+@@ -126,6 +128,66 @@ static PyObject* hopf_simulate(PyObject* self, PyObject* args) {
+     }
+ }
+ 
++// Paired counterfactual simulation with identical post-burn-in state and noise.
++static PyObject* hopf_simulate_paired_perturbation(PyObject* self, PyObject* args) {
++    PyObject *GEC_py, *frequencies_py, *mask_py;
++    int pre_samples, pulse_samples, recovery_samples, noise_type;
++    unsigned int random_seed;
++    double TR, sigma, a, delta_a, burnin_seconds;
++    if (!PyArg_ParseTuple(args, "OOOiiidddddiI", &GEC_py, &frequencies_py, &mask_py,
++                          &pre_samples, &pulse_samples, &recovery_samples, &TR, &sigma,
++                          &a, &delta_a, &burnin_seconds, &noise_type, &random_seed)) {
++        PyErr_SetString(PyExc_TypeError, "Expected GEC, frequencies, mask, pre_samples, pulse_samples, recovery_samples, TR, sigma, a, delta_a, burnin_seconds, noise_type, seed");
++        return NULL;
++    }
++    PyArrayObject* GEC_array = (PyArrayObject*)PyArray_FROM_OTF(GEC_py, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
++    PyArrayObject* freq_array = (PyArrayObject*)PyArray_FROM_OTF(frequencies_py, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
++    PyArrayObject* mask_array = (PyArrayObject*)PyArray_FROM_OTF(mask_py, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
++    if (!GEC_array || !freq_array || !mask_array) {
++        Py_XDECREF(GEC_array); Py_XDECREF(freq_array); Py_XDECREF(mask_array);
++        return NULL;
++    }
++    try {
++        Eigen::MatrixXd GEC = numpy_to_eigen_matrix(GEC_array);
++        Eigen::VectorXd frequencies = numpy_to_eigen_vector(freq_array);
++        Eigen::VectorXd mask = numpy_to_eigen_vector(mask_array);
++        const int N = GEC.rows();
++        if (GEC.cols() != N || frequencies.size() != N || mask.size() != N) {
++            throw std::runtime_error("Paired perturbation dimensions do not match");
++        }
++        HopfConfig config;
++        config.N=N; config.T=pre_samples+pulse_samples+recovery_samples;
++        config.TR=TR; config.sigma=sigma; config.a=a;
++        config.noise=static_cast<HopfConfig::Noise>(noise_type);
++        config.random_seed=random_seed; config.burnin_steps=static_cast<int>(burnin_seconds);
++        config.gec_matrix=GEC; config.regional_frequencies=frequencies;
++        HopfSimulator burned(config);
++        burned.burn_in_only();
++        HopfSimulator control = burned;
++        HopfSimulator intervention = burned;
++        Eigen::VectorXd zero = Eigen::VectorXd::Zero(N);
++        Eigen::VectorXd shift = delta_a * mask;
++        Eigen::MatrixXd control_all(N, config.T), intervention_all(N, config.T);
++        int offset=0;
++        for (int segment=0; segment<3; ++segment) {
++            int count = segment==0 ? pre_samples : (segment==1 ? pulse_samples : recovery_samples);
++            Eigen::MatrixXd c = control.simulate_segment(count, zero);
++            Eigen::MatrixXd i = intervention.simulate_segment(count, segment==1 ? shift : zero);
++            control_all.middleCols(offset,count)=c;
++            intervention_all.middleCols(offset,count)=i;
++            offset += count;
++        }
++        Py_DECREF(GEC_array); Py_DECREF(freq_array); Py_DECREF(mask_array);
++        PyObject* result=PyTuple_New(2);
++        PyTuple_SetItem(result,0,eigen_matrix_to_numpy(control_all));
++        PyTuple_SetItem(result,1,eigen_matrix_to_numpy(intervention_all));
++        return result;
++    } catch (const std::exception& e) {
++        Py_DECREF(GEC_array); Py_DECREF(freq_array); Py_DECREF(mask_array);
++        PyErr_SetString(PyExc_RuntimeError,e.what()); return NULL;
++    }
++}
++
+ // =============================================================================
+ // HOPF OPTIMIZATION FUNCTION
+ // =============================================================================
+@@ -277,7 +339,7 @@ static PyMethodDef HopfMethods[] = {
+         hopf_simulate,
+         METH_VARARGS,
+         "Run Hopf oscillator simulation. Returns: timeseries(NxT)\n"
+-        "Args: GEC(NxN), frequencies(N), T(int), TR(float), sigma(float), a(float), [noise_type(int), matlab_burnin(int)]"
++        "Args: GEC(NxN), frequencies(N), T(int), TR(float), sigma(float), a(float), [noise_type(int), random_seed(uint)]"
+     },
+     {
+         "optimize",
+@@ -286,6 +348,12 @@ static PyMethodDef HopfMethods[] = {
+         "Run Hopf model optimization. Returns: (GEC, FC_corr, FCsim, runtime, converged)\n"
+         "Args: TS(NxT), SC(NxN), frequencies(N), TR(float), [cooperative_only(int), matlab_burnin(int), ...]"
+     },
++    {
++        "simulate_paired_perturbation",
++        hopf_simulate_paired_perturbation,
++        METH_VARARGS,
++        "Return matched (control, intervention) trajectories with a temporary regional a shift."
++    },
+     {NULL, NULL, 0, NULL}  // Sentinel
+ };
+ 
+@@ -303,4 +371,4 @@ static struct PyModuleDef HopfModule = {
+ PyMODINIT_FUNC PyInit_hopf(void) {
+     import_array();
+     return PyModule_Create(&HopfModule);
+-}
+\ No newline at end of file
++}
+diff --git a/cpp/hopf_simulation.hpp b/cpp/hopf_simulation.hpp
+index 0e028fe..4817239 100644
+--- a/cpp/hopf_simulation.hpp
++++ b/cpp/hopf_simulation.hpp
+@@ -140,7 +140,7 @@ public:
+      * @param sim_config Configuration object containing model parameters
+      */
+     explicit HopfSimulator(HopfConfig sim_config) 
+-        : config(std::move(sim_config)), generator(42), normal_dist(0.0, 1.0) {
++        : config(std::move(sim_config)), generator(config.random_seed), normal_dist(0.0, 1.0) {
+ 
+         // Setup before validation to ensure computed parameters are initialized
+         this->config.setup_for_simulation();
+@@ -161,6 +161,29 @@ public:
+         run_burnin();           // Just do burn-in, save the state, don't simulate
+     }
+ 
++    /** Record a segment while applying a region-specific shift to local a. */
++    Eigen::MatrixXd simulate_segment(int samples, const Eigen::VectorXd& a_shift) {
++        if (samples <= 0 || a_shift.size() != config.N) {
++            throw std::runtime_error("Invalid perturbation segment specification");
++        }
++        a_matrix = (Eigen::VectorXd::Constant(config.N, config.a) + a_shift).replicate(1, 2);
++        Eigen::MatrixXd segment(samples, config.N);
++        segment.setZero();
++        int nn = 0;
++        double t = 0.0;
++        const double total_sim_time = (samples - 1) * config.TR;
++        while (t <= total_sim_time && nn < samples) {
++            integration_step();
++            double remainder = std::fmod(t, config.TR);
++            if (remainder < config.dt / 2.0 || remainder > (config.TR - config.dt / 2.0)) {
++                segment.row(nn) = z_state.col(0).transpose();
++                nn++;
++            }
++            t += config.dt;
++        }
++        return segment.transpose();
++    }
++
+     /**
+      * @brief Main simulation method - always does burn-in for MATLAB compatibility
+      * @return BOLD timeseries [N×T]
+@@ -210,4 +233,4 @@ public:
+         config.update_sum_C();
+         sum_C_matrix = config.sum_C.replicate(1, 2);
+     }
+-};
+\ No newline at end of file
++};
+
