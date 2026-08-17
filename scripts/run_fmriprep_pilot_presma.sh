@@ -5,6 +5,13 @@ project="/Users/shriyasai/Documents/Luppi et al. Recreation"
 input="${project}/data/derived/ds005498_pilot_bids"
 output="${project}/results/empirical_tms_fmri_translation/fmriprep"
 work="${project}/build/fmriprep_work"
+license="${project}/licenses/freesurfer/license.txt"
+
+if [[ ! -f "${license}" ]]; then
+  print -u2 "FreeSurfer license not found: ${license}"
+  print -u2 "fMRIPrep 25.2.5 requires this license even with --fs-no-reconall."
+  exit 2
+fi
 
 mkdir -p "${output}" "${work}"
 
@@ -12,6 +19,7 @@ docker run --rm --platform linux/amd64 \
   -v "${input}:/data:ro" \
   -v "${output}:/out" \
   -v "${work}:/work" \
+  -v "${license}:/opt/freesurfer/license.txt:ro" \
   nipreps/fmriprep:25.2.5 \
   /data /out participant \
   --participant-label NTHC1035 \

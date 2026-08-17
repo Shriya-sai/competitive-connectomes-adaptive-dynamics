@@ -18,6 +18,16 @@ The official GitHub repository contains MRIQC/QC scripts, stimulation masks and 
 
 The shared MATLAB timing file contains 68 continuous pulse onsets from 11.8 to 388.6 seconds. The accompanying 162-line binary vector is not the acquired run length: it ends at the final pulse and omits five trailing zero-only volumes. Event modeling will use the MATLAB onsets. If the first three acquired volumes are discarded, 7.2 seconds must be subtracted from every onset.
 
+### FreeSurfer licence gate
+
+The FreeSurfer registration form repeatedly rejected its own reCAPTCHA. A
+development attempt with fMRIPrep's supported `--force no-bbr` option still
+failed: fMRIPrep 25.2.5 performs a global FreeSurfer licence check even when
+surface reconstruction and BBR are disabled. No synthetic or borrowed licence
+will be used. The standardized preprocessing route remains paused pending a
+licence issued by FreeSurfer support; event construction and model
+specification can proceed independently in the meantime.
+
 ## Empirical question
 
 **Does independently estimated resting network embedding predict whether a matched localized TMS event produces primarily local BOLD response or broader downstream propagation?**
