@@ -23,6 +23,17 @@
     "slice_timing_correction": false,
     "output_space": "MNI152NLin2009cAsym:res-2"
   },
+  "first_level_glm": {
+    "status": "frozen_before_processed_BOLD_inspection",
+    "estimand": "mean response across 68 TMS pulses",
+    "hrf_model": "spm",
+    "high_pass_hz": 0.01,
+    "motion_regressors": "six rigid-body parameters plus first derivatives",
+    "motion_censoring": "one-hot regressors for fMRIPrep motion outliers and framewise displacement > 0.5 mm",
+    "framewise_displacement_threshold_mm": 0.5,
+    "serial_correlation_model_for_empirical_fit": "ar1",
+    "pulse_specific_effects": false
+  },
   "primary_predictions": [
     "negative and mixed-sign resting functional embedding predict absolute remote TMS-evoked propagation conditional on local response",
     "lower total absolute embedding predicts greater local susceptibility",

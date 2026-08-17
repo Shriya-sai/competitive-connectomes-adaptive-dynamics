@@ -78,6 +78,18 @@ Primary outcomes:
 
 Positive and negative BOLD betas will also be retained separately. Absolute propagation is primary because the Hopf result concerned response magnitude, while signed BOLD direction has a different interpretation.
 
+### Frozen first-level model
+
+The estimand is the mean response across all 68 pulses; pulse-specific effects
+are prohibited because 41 of 67 inter-pulse intervals are 4.8 seconds or
+shorter and their haemodynamic responses overlap. Events are modeled as
+zero-duration impulses convolved with the canonical SPM haemodynamic response.
+The design includes a 0.01 Hz cosine high-pass basis, six rigid-body motion
+parameters and their first derivatives, and one-volume censor regressors for
+fMRIPrep motion outliers or framewise displacement above 0.5 mm. The empirical
+voxelwise fit will use an AR(1) noise model. The design must be full-rank and
+must pass the synthetic known-effect recovery test before empirical fitting.
+
 ## Primary statistical model
 
 The observational unit is participant × stimulation site. Use a hierarchical model or an equivalent mixed-effects regression:
