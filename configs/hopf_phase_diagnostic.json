@@ -1,0 +1,64 @@
+{
+  "status": "frozen_exploratory_measurement_audit_before_diagnostic_reruns",
+  "version": "1.0.0",
+  "frozen_at_utc": "2026-08-12",
+  "parent_protocol": "configs/hopf_perturbation_response.json",
+  "inference_status": "exploratory diagnostic; cannot revise the completed confirmation result",
+  "reference_gain_conditions": {
+    "uncoupled": [0.0, 0.0],
+    "cooperative_only": [1.0, 0.0],
+    "competitive_only": [0.0, 1.0],
+    "fitted_signed": [1.0, 1.0],
+    "competition_dominant": [1.0, 1.5],
+    "cooperation_dominant": [1.5, 1.0]
+  },
+  "retain_parent_conditions": {
+    "sites": "all four frozen site sets",
+    "amplitudes": "all four frozen signed amplitudes",
+    "durations": "both frozen durations",
+    "seeds": "all confirmation seeds 300 through 329"
+  },
+  "filter": {
+    "band_hz": [0.01, 0.1],
+    "butterworth_order": 2,
+    "zero_phase": true,
+    "apply_to_complete_recorded_trajectory_before_windowing": true
+  },
+  "windows": {
+    "pulse": "exact pulse interval",
+    "matched_early_recovery": "post-pulse interval equal to that trial's pulse duration",
+    "late_recovery_seconds": 28.8
+  },
+  "spatial_edge_classes": [
+    "within_perturbed",
+    "within_unperturbed",
+    "cross_boundary",
+    "all_edges"
+  ],
+  "amplitude_qualification": {
+    "threshold": "channel-specific 20th percentile of control analytic amplitude during the 72-second pre-pulse baseline",
+    "pair_time_validity": "both members of an edge must exceed their own channel threshold in the control trajectory",
+    "minimum_valid_edge_time_fraction": 0.25,
+    "threshold_uses_intervention_data": false
+  },
+  "phase_distance": "one minus mean cosine of intervention-minus-control relative-phase difference over valid edge-times",
+  "common_mode_fraction": "mean_t(square(mean_regions(intervention_minus_control))) divided by mean_t(mean_regions(square(intervention_minus_control)))",
+  "matched_signal_measures": [
+    "direct_RMS_during_pulse",
+    "outside_RMS_during_pulse",
+    "direct_RMS_during_matched_early_recovery",
+    "outside_RMS_during_matched_early_recovery"
+  ],
+  "diagnostic_decision": {
+    "genuine_dissociation": "gain pattern persists in pulse-matched amplitude-qualified all-edge phase and is not explained by common-mode fraction alone",
+    "phase_estimation_artifact": "gain pattern substantially collapses after amplitude qualification and tracks invalid-phase fraction",
+    "spatially_localized": "qualified effect survives primarily in one prespecified edge class",
+    "mixed_or_inconclusive": "none of the above patterns is clearly supported"
+  },
+  "prohibitions": [
+    "do not alter the parent confirmation result",
+    "do not optimize the amplitude percentile",
+    "do not select a preferred pulse sign, duration, site, or seed",
+    "do not call this a new confirmation test"
+  ]
+}

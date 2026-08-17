@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "luppi-recreation"
+version = "0.1.0"
+description = "Python analysis pipeline for reproducing and extending Luppi et al. (2026)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "boto3>=1.35,<2",
+    "mat73",
+    "matplotlib",
+    "mne>=1.9,<2",
+    "nibabel>=5.3,<6",
+    "nilearn>=0.12,<0.13",
+    "numpy",
+    "pandas>=2.2,<3",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

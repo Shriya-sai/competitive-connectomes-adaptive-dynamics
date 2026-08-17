@@ -1,0 +1,104 @@
+{
+  "status": "frozen_before_focality_simulation",
+  "version": "1.0.0",
+  "frozen_at_utc": "2026-08-13",
+  "question": "How do perturbation focality and cooperative-competitive regime jointly determine local response, outward propagation, relational phase reconfiguration, spatial reach, and recovery?",
+  "parent_model_config": "configs/hopf_perturbation_response.json",
+  "gain_conditions": {
+    "uncoupled_control": [0.0, 0.0],
+    "cooperative_only": [1.0, 0.0],
+    "competitive_only": [0.0, 1.0],
+    "fitted_signed": [1.0, 1.0],
+    "competition_dominant": [1.0, 1.5],
+    "cooperation_dominant": [1.5, 1.0]
+  },
+  "focalities": [1, 5, 10, 20],
+  "nested_zero_based_families": {
+    "central_A": [42, 45, 88, 82, 33, 99, 44, 48, 13, 96, 43, 85, 11, 17, 7, 83, 18, 8, 55, 98],
+    "central_B": [34, 49, 14, 69, 1, 22, 21, 15, 70, 29, 68, 71, 46, 20, 95, 57, 65, 51, 5, 37],
+    "peripheral_A": [10, 92, 84, 23, 9, 80, 61, 24, 30, 50, 58, 36, 31, 74, 4, 77, 78, 86, 47, 94],
+    "peripheral_B": [26, 90, 25, 97, 27, 87, 59, 93, 0, 12, 91, 89, 73, 76, 54, 81, 28, 38, 16, 41]
+  },
+  "nesting_rule": "For focality N use the first N entries of the frozen family; every 10-region set exactly reproduces its parent-protocol set.",
+  "dose_schemes": {
+    "constant_per_region": "signed delta_a per targeted region equals sign * 0.03",
+    "constant_total": "signed delta_a per targeted region equals sign * 0.03 / focality"
+  },
+  "signs": [-1, 1],
+  "pulse_duration_seconds": 28.8,
+  "recorded_preperturbation_seconds": 72.0,
+  "recorded_recovery_seconds": 144.0,
+  "discarded_burn_in_seconds": 500.0,
+  "phase_processing": {
+    "band_hz": [0.01, 0.1],
+    "butterworth_order": 2,
+    "amplitude_threshold": "channel-specific control-baseline 20th percentile",
+    "minimum_valid_edge_time_fraction": 0.25,
+    "edge_values_are_means_not_sums": true
+  },
+  "primary_measurements": [
+    "targeted_region_RMS",
+    "outside_region_RMS",
+    "total_response_energy",
+    "response_per_targeted_region",
+    "propagation_per_untargeted_region",
+    "within_target_phase",
+    "cross_boundary_phase",
+    "within_untargeted_phase",
+    "recovery_time",
+    "residual_displacement",
+    "spatial_reach_fraction"
+  ],
+  "spatial_reach": "fraction of untargeted regions whose pulse RMS exceeds 5 percent of the median targeted-region pulse RMS in that pair",
+  "system_level_descriptive_label": {
+    "remote_phase_fraction": "within_untargeted_phase divided by max(within_target_phase, cross_boundary_phase)",
+    "remote_phase_threshold": 0.25,
+    "spatial_reach_threshold": 0.25,
+    "label": "remote_phase_fraction >= 0.25 and spatial_reach_fraction >= 0.25",
+    "interpretation": "prespecified descriptive threshold, not proof of a whole-brain state transition"
+  },
+  "randomization": {
+    "development_seeds": [400, 401, 402, 403, 404],
+    "confirmation_seeds": [500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529]
+  },
+  "development_design": {
+    "gains": ["uncoupled_control", "cooperative_only", "competitive_only", "fitted_signed"],
+    "families": ["central_A", "peripheral_A"],
+    "all_focalities": true,
+    "all_dose_schemes": true,
+    "all_signs": true,
+    "paired_interventions": 640
+  },
+  "confirmation_design": {
+    "all_gains": true,
+    "all_families": true,
+    "all_focalities": true,
+    "all_dose_schemes": true,
+    "all_signs": true,
+    "paired_interventions": 11520
+  },
+  "instrument_gate": {
+    "exact_prepulse_pair_identity_tolerance": 1e-10,
+    "all_outputs_finite": true,
+    "nested_sets_verified": true,
+    "constant_total_sum_tolerance": 1e-12,
+    "constant_per_region_values_verified": true,
+    "uncoupled_outside_RMS_tolerance": 1e-10,
+    "confirmation_allowed_only_if_all_pass": true
+  },
+  "analysis_rules": {
+    "report_dose_schemes_separately": true,
+    "report_signs_separately": true,
+    "test_focality_trend_with_spearman_per_gain_family_sign_seed": true,
+    "classify_linear_sublinear_superlinear_using_log_log_slope": true,
+    "linear_slope_band": [0.8, 1.2],
+    "no_composite_score": true,
+    "no_overall_winner": true
+  },
+  "scope_limits": [
+    "one fitted connectome",
+    "connectivity-strength-defined targets rather than named functional systems",
+    "one pulse magnitude and duration",
+    "one perturbation mechanism"
+  ]
+}

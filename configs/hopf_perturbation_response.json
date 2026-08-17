@@ -1,0 +1,150 @@
+{
+  "protocol_status": "frozen_before_perturbation_simulator_implementation_or_outcome_generation",
+  "protocol_version": "1.0.0",
+  "frozen_at_utc": "2026-08-12",
+  "scientific_question": "How do cooperative and competitive coupling gains alter the magnitude, propagation, reconfiguration, persistence, and recovery of whole-network responses to matched exogenous perturbations?",
+  "scope": {
+    "permitted_terms": [
+      "perturbation response",
+      "dynamical responsiveness",
+      "propagation",
+      "reconfiguration",
+      "recovery",
+      "stability-flexibility trade-off"
+    ],
+    "prohibited_claims_without_additional_model_or_data": [
+      "learning",
+      "reversal learning",
+      "reward learning",
+      "action selection",
+      "exploration",
+      "exploitation",
+      "behavioural adaptation"
+    ]
+  },
+  "model": {
+    "connectivity_file": "results/single_subject_optimization/signed.npz",
+    "connectivity_array": "generative_connectivity",
+    "frequency_array": "regional_frequencies",
+    "connectivity_sha256": "1c751f9b8777392c2210cc8d42aef0e90d059c923728b0ac365e2dcae7eb0e7f",
+    "regions": 100,
+    "repetition_time_seconds": 0.72,
+    "baseline_bifurcation_parameter": -0.02,
+    "noise_strength": 0.001,
+    "noise_type": 1,
+    "connectivity_scaling": "cooperative_gain * positive(C) + competitive_gain * negative(C)",
+    "connectivity_unchanged_within_each_trial": true,
+    "regional_frequencies_unchanged_within_each_trial": true
+  },
+  "simulation_schedule": {
+    "discarded_burn_in_seconds": 500.0,
+    "recorded_preperturbation_seconds": 72.0,
+    "recorded_recovery_seconds": 144.0,
+    "sample_at_repetition_time": true,
+    "paired_control_and_intervention_share_initial_state": true,
+    "paired_control_and_intervention_share_noise_sequence": true,
+    "intervention_only_difference": "temporary regional shift of local bifurcation parameter"
+  },
+  "gain_grid": {
+    "cooperative": [0.0, 0.5, 1.0, 1.5],
+    "competitive": [0.0, 0.5, 1.0, 1.5],
+    "analyze_full_factorial": true,
+    "special_reference_conditions": {
+      "uncoupled": [0.0, 0.0],
+      "cooperative_only": [1.0, 0.0],
+      "competitive_only": [0.0, 1.0],
+      "fitted_signed": [1.0, 1.0]
+    }
+  },
+  "perturbations": {
+    "mechanism": "add delta_a to the local bifurcation parameter of selected regions during the pulse only",
+    "delta_a": [-0.03, -0.01, 0.01, 0.03],
+    "duration_seconds": [7.2, 28.8],
+    "site_set_size": 10,
+    "site_selection_rule": {
+      "strength_definition": "row sum of absolute frozen signed connectivity",
+      "ranking_tie_break": "ascending zero-based region index",
+      "central_pool": "20 highest-strength regions",
+      "peripheral_pool": "20 lowest-strength regions",
+      "set_A": "even positions in the pool after strength ranking",
+      "set_B": "odd positions in the pool after strength ranking",
+      "sets": ["central_A", "central_B", "peripheral_A", "peripheral_B"]
+    },
+    "resolved_zero_based_site_sets": {
+      "central_A": [42, 45, 88, 82, 33, 99, 44, 48, 13, 96],
+      "central_B": [34, 49, 14, 69, 1, 22, 21, 15, 70, 29],
+      "peripheral_A": [10, 92, 84, 23, 9, 80, 61, 24, 30, 50],
+      "peripheral_B": [26, 90, 25, 97, 27, 87, 59, 93, 0, 12]
+    },
+    "do_not_select_sites_from_response_outcomes": true
+  },
+  "randomization": {
+    "development_seeds": [200, 201, 202, 203, 204],
+    "confirmation_seeds": [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329],
+    "development_purpose": "verify numerical correctness, counterfactual identity, and metric sensitivity only",
+    "confirmation_outcomes_untouched_until_instrument_gate_passes": true
+  },
+  "primary_observables": {
+    "direct_response": "RMS intervention-minus-control signal displacement within perturbed regions during pulse",
+    "propagation": "RMS intervention-minus-control signal displacement outside perturbed regions during pulse",
+    "propagation_fraction": "outside-region displacement divided by total displacement during pulse",
+    "phase_reconfiguration": "one minus mean cosine similarity between intervention and control pairwise relative-phase patterns",
+    "recovery_time": "first post-pulse time after which smoothed total displacement remains below 5 percent of that pair's peak pulse response for 14.4 seconds",
+    "residual_displacement": "mean total intervention-minus-control displacement in the final 28.8 seconds",
+    "response_reliability": "cross-seed similarity of regional response-amplitude vectors"
+  },
+  "exploratory_observables": {
+    "functional_reconfiguration": "normalized Frobenius distance between shrinkage correlation matrices over the first 28.8 seconds from pulse onset; exploratory because the brief-pulse condition contains only 10 directly perturbed samples"
+  },
+  "analysis_rules": {
+    "report_metrics_separately": true,
+    "weighted_composite_score_prohibited": true,
+    "ranked_best_condition_prohibited": true,
+    "pareto_dimensions": [
+      "unperturbed_stability",
+      "direct_response",
+      "propagation",
+      "recovery_time",
+      "residual_displacement",
+      "response_reliability"
+    ],
+    "pareto_orientation_is_descriptive_not_normative": true,
+    "paired_seed_comparisons_required": true,
+    "positive_and_negative_pulses_reported_separately": true,
+    "brief_and_sustained_pulses_reported_separately": true,
+    "central_and_peripheral_site_sets_reported_separately": true
+  },
+  "development_design": {
+    "gain_conditions": [
+      [0.0, 0.0],
+      [1.0, 0.0],
+      [0.0, 1.0],
+      [1.0, 1.0]
+    ],
+    "all_site_sets": true,
+    "all_amplitudes": true,
+    "all_durations": true,
+    "paired_interventions": 640
+  },
+  "confirmation_design": {
+    "full_gain_grid": true,
+    "all_site_sets": true,
+    "all_amplitudes": true,
+    "all_durations": true,
+    "paired_interventions": 15360
+  },
+  "instrument_gate": {
+    "zero_pulse_control_max_absolute_difference": 1e-10,
+    "response_must_increase_monotonically_with_absolute_delta_a_in_at_least_fraction_of_development_cells": 0.8,
+    "no_nan_or_infinite_values": true,
+    "paired_noise_identity_before_pulse_max_absolute_difference": 1e-10,
+    "site_permutation_test_required": true,
+    "confirmation_runs_permitted_only_if_all_checks_pass": true
+  },
+  "stopping_rules": {
+    "do_not_tune_perturbations_to_make_balanced_gains_win": true,
+    "do_not_relabel_any_metric_as_learning_or_exploration": true,
+    "if_instrument_gate_fails_fix_implementation_or_version_protocol_before_confirmation": true,
+    "if_no_gain_tradeoff_appears_record_null_result_without_constructing_a_composite": true
+  }
+}

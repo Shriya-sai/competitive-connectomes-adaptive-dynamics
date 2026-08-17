@@ -1,0 +1,4 @@
+Repository: https://github.com/Hana-Ali/competitive-cooperative-hopf.git
+Commit: da592aab6784db5c6c59f29f6bcb2b3743f1afd7
+Retrieved: 2026-08-04
+Role: Upstream Hopf simulator, optimizer, reference MATLAB pipeline, and released demonstration data

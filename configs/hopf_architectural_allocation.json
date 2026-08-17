@@ -1,0 +1,37 @@
+{
+  "status": "frozen_before_simulation",
+  "version": "1.0.0",
+  "frozen_at_utc": "2026-08-13",
+  "question": "Given a fixed perturbational budget and target count, how does spatial allocation interact with cooperative-competitive network architecture to determine local response, propagation, phase reconfiguration, and recovery?",
+  "selection_connectome": "results/single_subject_optimization/signed.npz::generative_connectivity",
+  "selection_rule": "Rank nodes once on the frozen fitted signed connectome; alternating ranks form matched A/B sets of ten nodes. Sets remain unchanged across gain conditions.",
+  "target_count": 10,
+  "total_absolute_budget": 0.03,
+  "allocation_per_target": 0.003,
+  "strategies": {
+    "absolute_hub": {"A": [42,45,88,82,33,99,44,48,13,96], "B": [34,49,14,69,1,22,21,15,70,29]},
+    "cooperative_strength": {"A": [34,49,45,1,44,22,21,33,13,95], "B": [42,69,88,14,99,82,48,15,43,68]},
+    "competitive_strength": {"A": [8,45,77,7,88,57,96,6,85,24], "B": [42,75,33,83,82,70,74,14,86,63]},
+    "mixed_sign_strength": {"A": [42,88,82,14,7,83,57,85,11,6], "B": [45,33,34,8,70,96,49,75,71,13]},
+    "peripheral": {"A": [10,92,84,23,9,80,61,24,30,50], "B": [26,90,25,97,27,87,59,93,0,12]},
+    "random_control": {"A": [26,60,96,92,90,53,15,78,68,24], "B": [2,19,13,16,76,1,87,67,28,95]}
+  },
+  "gain_conditions": {
+    "uncoupled_control": [0.0,0.0],
+    "cooperative_only": [1.0,0.0],
+    "competitive_only": [0.0,1.0],
+    "fitted_signed": [1.0,1.0],
+    "competition_dominant": [1.0,1.5],
+    "cooperation_dominant": [1.5,1.0]
+  },
+  "signs": [-1,1],
+  "development_seeds": [600,601,602,603,604],
+  "confirmation_seeds": [700,701,702,703,704,705,706,707,708,709,710,711,712,713,714,715,716,717,718,719,720,721,722,723,724,725,726,727,728,729],
+  "development_conditions": ["uncoupled_control","cooperative_only","competitive_only","fitted_signed"],
+  "development_pairs": 480,
+  "confirmation_pairs": 4320,
+  "primary_outcomes": ["response_per_targeted_region","propagation_per_untargeted_region","total_response_energy","cross_boundary","within_untargeted","recovery_time_seconds","residual_displacement"],
+  "excluded_from_primary_inference": ["spatial_reach_fraction","remote_phase_fraction","system_level_label"],
+  "analysis": "Compare strategies within gain x sign x replicate x seed; report A/B consistency, strategy medians, and architecture-by-gain rank changes. No composite score and no overall winner.",
+  "scope_limit": "Mechanistic single-connectome experiment; it does not establish learning or behaviour. This is the final planned Hopf parameter experiment before an empirical prediction."
+}

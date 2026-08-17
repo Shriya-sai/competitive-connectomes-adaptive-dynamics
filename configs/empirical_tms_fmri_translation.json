@@ -1,0 +1,49 @@
+{
+  "status": "conceptual_protocol_frozen_before_data_download",
+  "dataset": "OpenNeuro ds005498 v2.0.0",
+  "dataset_doi": "10.18112/openneuro.ds005498.v2.0.0",
+  "paper_doi": "10.1038/s41597-025-05377-y",
+  "primary_cohort": "non-trauma healthy control",
+  "development_subset": ["sub-NTHC1035", "sub-NTHC1036", "sub-NTHC1037", "sub-NTHC1038"],
+  "development_selection_rule": "first four ascending NTHC participant IDs with resting fMRI and all 11 TMS-site runs in the official participant-information table",
+  "metadata_audit": {
+    "participants": 152,
+    "resting_runs": 151,
+    "NTHC_participants": 46,
+    "NTHC_with_all_11_sites_and_rest": 23,
+    "official_repository_commit": "d98e8f8902f7eb7053a2aaafdafc9131422d455f"
+  },
+  "fmriprep": {
+    "container": "nipreps/fmriprep:25.2.5",
+    "container_architecture": "linux/amd64",
+    "host_architecture": "linux/arm64 via Docker Desktop emulation",
+    "freesurfer_reconstruction": false,
+    "initial_infrastructure_test_task": "stim6x2x70",
+    "initial_infrastructure_test_site": "right pre-SMA",
+    "slice_timing_correction": false,
+    "output_space": "MNI152NLin2009cAsym:res-2"
+  },
+  "primary_predictions": [
+    "negative and mixed-sign resting functional embedding predict absolute remote TMS-evoked propagation conditional on local response",
+    "lower total absolute embedding predicts greater local susceptibility",
+    "signed embedding improves participant-held-out prediction over unsigned total strength"
+  ],
+  "primary_outcomes": [
+    "absolute local evoked beta",
+    "absolute remote evoked beta",
+    "remote evoked beta conditional on local response",
+    "baseline-variance-anchored remote response extent"
+  ],
+  "mandatory_sensitivities": [
+    "with and without global signal regression",
+    "positive and negative evoked betas separately",
+    "leave-one-site-out",
+    "participant-grouped cross-validation",
+    "cohort generalization"
+  ],
+  "prohibited_claims": [
+    "negative resting correlation is a direct inhibitory anatomical connection",
+    "TMS-fMRI validates Hopf phase reconfiguration",
+    "architecture-response coupling demonstrates adaptive behaviour"
+  ]
+}
