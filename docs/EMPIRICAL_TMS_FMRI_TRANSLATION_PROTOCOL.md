@@ -28,6 +28,43 @@ will be used. The standardized preprocessing route remains paused pending a
 licence issued by FreeSurfer support; event construction and model
 specification can proceed independently in the meantime.
 
+### Licence-free volumetric contingency
+
+After the registration form, support email and subscribed mailing-list route
+failed to provide a licence, AFNI `26.1.04` was selected for a bounded
+volumetric pilot. AFNI's `sswarper2` performs T1w skull stripping and nonlinear
+normalization to its `MNI152_2009_template_SSW` reference, which is derived from
+MNI152 nonlinear 2009c asymmetric space. The official AMD64 container is pinned
+by tag and runs through Docker emulation on the ARM64 host. Anatomical
+normalization is executed and visually quality-controlled before any functional
+workflow is specified or any TMS response is inspected. fMRIPrep remains the
+preferred sensitivity pipeline if a valid FreeSurfer licence is later issued.
+
+#### Anatomical pilot result (sub-NTHC1035)
+
+The pinned AFNI `26.1.04` `sswarper2` workflow completed on the session-1 T1w
+image and produced the expected native-space skull-stripped anatomy, affine
+transform, nonlinear warp and MNI2009c-normalized anatomy. All deliverable NIfTI
+arrays were finite. The normalized anatomy has the template grid
+(`193 x 229 x 193`, 1 mm isotropic); the native skull-strip preserves the input
+grid (`184 x 256 x 256`, `1 x 0.9375 x 0.9375` mm).
+
+Visual QC was accepted after inspecting the final edge-overlay montage and the
+native-space skull-strip montage. Template edges followed the cortical envelope,
+ventricles, cerebellum and medial/superior cortex without a gross orientation
+error or implausible deformation. The skull-strip retained brain tissue without
+obvious skull inclusion or major cortical loss. The large initial affine
+translation (approximately 36 mm, predominantly anterior-posterior) therefore
+did not indicate a failed registration; the subsequent affine refinement was
+small (approximately 0.5 mm and 0.2 degrees), and the final visual result was
+acceptable. This anatomical QC gate passes for the pilot subject.
+
+The highest-resolution nonlinear passes were costly under AMD64 emulation. The
+level-7 and fully refined montages were visually similar, but the fully refined
+run is retained as the reference result. Any faster cap used during later
+expansion must first be treated as a sensitivity analysis against this reference,
+not silently substituted.
+
 ## Empirical question
 
 **Does independently estimated resting network embedding predict whether a matched localized TMS event produces primarily local BOLD response or broader downstream propagation?**
