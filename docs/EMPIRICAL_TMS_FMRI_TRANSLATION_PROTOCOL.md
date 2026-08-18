@@ -65,6 +65,96 @@ run is retained as the reference result. Any faster cap used during later
 expansion must first be treated as a sensitivity analysis against this reference,
 not silently substituted.
 
+#### Functional pilot specification
+
+The first functional gate uses the right preSMA run
+`sub-NTHC1035_ses-2_task-stim6x2x70_bold`. The first three acquired volumes are
+discarded for equilibration, leaving 164 volumes and requiring an exact 7.2 s
+subtraction from every pulse onset in the later first-level model. The first two
+discarded volumes have whole-brain means approximately 2.5% and 2.2% below the
+post-equilibration median, supporting this decision.
+
+The BIDS sidecar provides TR and TE but no per-slice timing array, phase-encoding
+direction, total readout time or fieldmap. Slice-timing and susceptibility-
+distortion correction are therefore omitted rather than inferred. This is a
+material limitation and remains part of the later fMRIPrep sensitivity route if
+the missing information can be recovered.
+
+The pinned AFNI pipeline uses the blocks `despike align tlrc volreg blur mask
+scale regress`. EPI-to-anatomy alignment uses `lpc+ZZ`, a giant-move search and
+left-right flip checking because anatomy and TMS EPI were acquired in different
+sessions. Motion correction, EPI-to-anatomy alignment and the accepted nonlinear
+MNI2009c warp are concatenated and applied in one resampling to a 2 mm grid.
+The normalized data are smoothed at 4 mm FWHM and scaled to a run mean of 100.
+AFNI motion-enorm censoring at 0.3 and outlier-fraction censoring at 0.05 are used
+for preprocessing QC and nuisance-only residual generation; they do not replace
+the frozen first-level rule based on framewise displacement above 0.5 mm. The
+scaled pre-regression time series and motion estimates remain the inputs to the
+separately frozen AR(1) TMS model.
+
+#### Functional pilot QC result (sub-NTHC1035 right preSMA)
+
+The AFNI pipeline completed with 164 retained volumes. No volume exceeded the
+0.3 motion-enorm or 0.05 outlier-fraction QC thresholds. Mean frame-to-frame
+motion was 0.043 mm, mean outlier fraction was 0.0018, average TSNR was 165.5,
+and the nuisance design retained 148/164 degrees of freedom. The left-right
+test favored the original orientation. Visual inspection found plausible
+EPI-to-anatomy alignment, a quiet motion/grayplot panel and no gross residual
+radial-correlation artifact. The absent susceptibility-distortion correction
+remains a limitation even though gross alignment passed.
+
+The acquisition has nonuniform spatial coverage, so coverage is now an explicit
+eligibility criterion rather than an implicit assumption. The exact released
+right-preSMA sphere has 76.1% raw coverage, but this denominator includes
+non-cortical voxels outside the superior cortical surface. Its Schaefer-cortical
+portion has 90.1% coverage and the sphere's dominant parcel (78) has 91.4%
+coverage. Across the atlas, 98/100 parcels have at least 80% coverage and 95/100
+have at least 90% coverage. Local response will use only cortical voxels inside
+the released sphere and requires at least 90% coverage. Remote parcels require
+at least 80% coverage; their coverage fractions are retained for sensitivity
+analysis, and only eligible parcels enter the equal-parcel mean.
+
+The geometric-coverage mask and AFNI's intensity-derived EPI/anatomy automask
+answer different questions and cannot be substituted for one another. Although
+the cortical target is geometrically sampled, the automask retains only 37/356
+target voxels (10.4%); target median TSNR is 10.3, versus 38.5 in the retained
+subset. It also retains at least 80% of only 27/100 Schaefer parcels. An initial
+automask-only model was therefore recognized as an invalid primary test because
+it discarded most of the intended target and network. The prospectively
+corrected primary cortical mask is valid EPI-grid extent intersected with the
+Schaefer cortex. The restrictive automask is retained as a sensitivity analysis.
+This correction recovers measured but low-SNR target data; it does not cure the
+low SNR, which remains an explicit inferential limitation.
+
+AFNI's variance-line detector flagged one narrow midline-superior column near
+`x=0.2, y=1.6` mm. Because this is spatially close to the stimulation target,
+it is not dismissed despite occupying few voxels. Its overlap and influence on
+the local beta must be reported as a leave-flagged-column-out sensitivity check.
+The functional gate therefore passes conditionally for first-level modeling,
+not unconditionally for final inference.
+
+#### First-level pilot result
+
+The frozen event model contains 68 zero-duration TMS events, the SPM HRF,
+motion and motion-derivative nuisance terms, a 0.01 Hz cosine high-pass basis,
+and Power-style FD spikes above 0.5 mm. The supplied 164-by-21 design is full
+rank (condition number 251.3); its maximum TMS-to-nuisance correlation is 0.21.
+No volume exceeded the FD threshold (maximum 0.444 mm). An AR(1) voxelwise fit
+produced finite beta and z maps.
+
+In the geometrically covered cortical target, the mean event beta was -42.9 in
+scaled-model units and mean z was -0.64 across 356 voxels. The restrictive
+automask sensitivity retained 37 target voxels and agreed in direction but was
+also weak (mean beta -10.9; mean z -0.36). Across 90 eligible remote parcels,
+the mean absolute parcel beta was 9.35, but no parcel passed the frozen
+`|mean z| >= 3.1` response-extent threshold. Thus this single low-SNR pilot
+contains no reliably detectable local or remote TMS response under the current
+model. Agreement between masks makes a gross mask-driven sign reversal less
+likely, but it does not turn a null pilot into evidence that stimulation had no
+effect. The result is a pipeline and measurement diagnostic, not a subject- or
+population-level test of the scientific predictions. The flagged variance-line
+sensitivity remains required before this run can contribute to final inference.
+
 ## Empirical question
 
 **Does independently estimated resting network embedding predict whether a matched localized TMS event produces primarily local BOLD response or broader downstream propagation?**

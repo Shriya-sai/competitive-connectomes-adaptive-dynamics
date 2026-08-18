@@ -60,8 +60,11 @@ def measure_tms_spatial_response(
 
     local = stimulation & brain
     local_signed = float(np.mean(beta[local]))
+    # The exclusion field follows the intended stimulation sphere, including
+    # portions outside the observed brain mask. Otherwise missing local
+    # coverage could incorrectly cause nearby parcels to be labelled remote.
     distance_from_local = distance_transform_edt(
-        ~local, sampling=voxel_sizes_mm
+        ~stimulation, sampling=voxel_sizes_mm
     )
     exclusion = distance_from_local <= exclusion_buffer_mm
 
