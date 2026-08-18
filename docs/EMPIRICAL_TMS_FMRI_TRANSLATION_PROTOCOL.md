@@ -193,6 +193,37 @@ For each participant:
 
 Architecture must be estimated only from rest—not from the TMS run being predicted.
 
+### Resting pilot implementation and result
+
+The `sub-NTHC1035` resting run is preprocessed with pinned AFNI 26.1.04 using
+the same nonlinear anatomical normalization and 2 mm MNI2009c grid as the TMS
+run. The first three volumes are removed, and the workflow applies despiking,
+motion correction, EPI-to-anatomy alignment, concatenated nonlinear warping,
+4 mm smoothing and run-mean scaling. Nuisance regression includes motion and
+its derivatives, three eroded-white-matter principal components, a 0.01--0.10
+Hz band pass, motion censoring at 0.2 AFNI enorm and outlier censoring at 0.05.
+Slice-timing and susceptibility-distortion correction remain unavailable for
+the same metadata reasons as the TMS run.
+
+The run retains 226/237 post-equilibration volumes after censoring (4.6%) and
+56 final degrees of freedom. Mean motion is 0.057 mm, average TSNR is 371.8,
+GCOR is 0.0092, and the anatomy/EPI mask Dice coefficient is 0.719. The
+left-right test favors the original orientation. Visual QC shows plausible
+alignment, a quiet grayplot outside censored spikes, and spatially structured
+canonical seed maps. No persistent internal variance-line artifact was found.
+
+Ninety-eight of 100 Schaefer parcels meet the 80% geometric-coverage rule;
+parcels 54 and 58 are provisionally excluded. The released right-preSMA sphere
+selects parcel 78 uniquely. Without global-signal regression, its positive and
+negative strengths are 13.27 and 4.45. With GSR they are 8.00 and 5.15,
+respectively. Across all eligible edges, the negative fraction changes from
+44.9% without GSR to 52.5% with GSR. Split-half edge-order reliability is
+moderate (Spearman rho 0.55 without GSR and 0.46 with GSR). The embedding is
+therefore accepted for development-pipeline testing, while its GSR dependence,
+limited degrees of freedom and only moderate internal reliability prohibit
+single-subject biological inference. A common parcel set must be frozen across
+the full development cohort before between-subject modeling.
+
 ### Frozen embedding definitions
 
 Resting functional connectivity is the Pearson correlation matrix among the
