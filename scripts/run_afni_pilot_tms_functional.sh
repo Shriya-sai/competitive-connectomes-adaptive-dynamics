@@ -62,3 +62,18 @@ docker run --rm --platform linux/amd64 \
   -regress_est_blur_errts \
   -html_review_style pythonic \
   -execute
+
+# Transform AFNI's native-EPI variance-line flag with the reference-volume
+# EPI-to-MNI warp. This supports a leave-flagged-column-out GLM sensitivity.
+mkdir -p "${output}/glm"
+docker run --rm --platform linux/amd64 \
+  -v "${output}:/pilot" \
+  afni/afni_make_build:AFNI_26.1.04 \
+  3dNwarpApply \
+  -master /pilot/NTHC1035_presma.results/anatQQ.NTHC1035+tlrc \
+  -dxyz 2 \
+  -source /pilot/NTHC1035_presma.results/vlines.pb00.tcat/clustset.r01.nii.gz \
+  -nwarp "/pilot/NTHC1035_presma.results/anatQQ.NTHC1035_WARP.nii /pilot/NTHC1035_presma.results/mat.basewarp.aff12.1D" \
+  -interp NN \
+  -ainterp NN \
+  -prefix /pilot/glm/variance_line_mask_mni.nii.gz

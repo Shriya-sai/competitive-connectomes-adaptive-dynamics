@@ -128,10 +128,12 @@ low SNR, which remains an explicit inferential limitation.
 
 AFNI's variance-line detector flagged one narrow midline-superior column near
 `x=0.2, y=1.6` mm. Because this is spatially close to the stimulation target,
-it is not dismissed despite occupying few voxels. Its overlap and influence on
-the local beta must be reported as a leave-flagged-column-out sensitivity check.
-The functional gate therefore passes conditionally for first-level modeling,
-not unconditionally for final inference.
+it was not dismissed despite occupying few voxels. Nearest-neighbour
+transformation with the reference-volume EPI-to-MNI warp produced 140 flagged
+2 mm voxels, but only one overlapped the 356-voxel cortical target (0.28%).
+Leaving that voxel out changed the target mean beta from -42.87 to -42.89 and
+the mean z from -0.637 to -0.636. The flagged column therefore has negligible
+influence on the local summary, and this specific sensitivity gate passes.
 
 #### First-level pilot result
 
@@ -152,8 +154,7 @@ contains no reliably detectable local or remote TMS response under the current
 model. Agreement between masks makes a gross mask-driven sign reversal less
 likely, but it does not turn a null pilot into evidence that stimulation had no
 effect. The result is a pipeline and measurement diagnostic, not a subject- or
-population-level test of the scientific predictions. The flagged variance-line
-sensitivity remains required before this run can contribute to final inference.
+population-level test of the scientific predictions.
 
 ## Empirical question
 

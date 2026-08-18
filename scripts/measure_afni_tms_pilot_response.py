@@ -92,6 +92,11 @@ def main() -> None:
         GLM / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_mask-AFNIAuto_z.nii.gz"
     ).get_fdata()
     auto_local = sphere & (atlas > 0) & auto_mask
+    variance_line = nib.load(GLM / "variance_line_mask_mni.nii.gz").get_fdata() > 0
+    flagged_local = local & variance_line
+    clean_local = local & ~variance_line
+    if not np.any(clean_local):
+        raise RuntimeError("Variance-line exclusion removed the entire target")
     result = {
         "subject": "sub-NTHC1035",
         "run": "ses-2_task-stim6x2x70",
@@ -107,6 +112,16 @@ def main() -> None:
         ),
         "automask_sensitivity_local_mean_z": float(np.mean(auto_z[auto_local])),
         "automask_sensitivity_local_voxels": int(auto_local.sum()),
+        "variance_line_voxels_mni": int(variance_line.sum()),
+        "variance_line_target_overlap_voxels": int(flagged_local.sum()),
+        "variance_line_target_overlap_fraction": float(
+            flagged_local.sum() / local.sum()
+        ),
+        "variance_line_excluded_local_signed_beta": float(
+            np.mean(beta[clean_local])
+        ),
+        "variance_line_excluded_local_mean_z": float(np.mean(z_map[clean_local])),
+        "variance_line_excluded_local_voxels": int(clean_local.sum()),
         "remote_mean_absolute_beta": response.remote_mean_absolute_beta,
         "remote_mean_positive_beta": response.remote_mean_positive_beta,
         "remote_mean_negative_magnitude": response.remote_mean_negative_magnitude,
