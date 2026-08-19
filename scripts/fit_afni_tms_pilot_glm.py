@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fit the frozen AR(1) TMS model to the AFNI right-preSMA pilot."""
+"""Fit the frozen AR(1) TMS model to any AFNI NTHC1035 TMS site."""
 
 from __future__ import annotations
 
 import json
+import argparse
 from pathlib import Path
 import sys
 
@@ -19,17 +20,12 @@ sys.path.insert(0, str(ROOT / "src"))
 from luppi_recreation.tms_glm import audit_tms_design, build_tms_design
 
 
-AFNI = (
+PRESMA_AFNI = (
     ROOT
     / "results/empirical_tms_fmri_translation/afni/tms_presma_sub-NTHC1035"
     / "NTHC1035_presma.results"
 )
-EVENTS = (
-    ROOT
-    / "data/derived/ds005498_pilot_bids/sub-NTHC1035/ses-2/func"
-    / "sub-NTHC1035_ses-2_task-stim6x2x70_events.tsv"
-)
-OUTPUT = (
+PRESMA_OUTPUT = (
     ROOT
     / "results/empirical_tms_fmri_translation/afni/tms_presma_sub-NTHC1035/glm"
 )
@@ -41,10 +37,10 @@ ATLAS = (
 )
 
 
-def afni_motion_confounds() -> tuple[pd.DataFrame, np.ndarray]:
+def afni_motion_confounds(afni: Path) -> tuple[pd.DataFrame, np.ndarray]:
     """Convert AFNI roll/pitch/yaw/dS/dL/dP parameters to frozen confounds."""
 
-    motion = np.loadtxt(AFNI / "dfile_rall.1D", dtype=float)
+    motion = np.loadtxt(afni / "dfile_rall.1D", dtype=float)
     if motion.shape != (164, 6):
         raise ValueError(f"Expected 164x6 AFNI motion array, found {motion.shape}")
 
@@ -80,20 +76,46 @@ def afni_motion_confounds() -> tuple[pd.DataFrame, np.ndarray]:
 
 
 def main() -> None:
-    output = OUTPUT
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--site", default="R-preSMA")
+    args = parser.parse_args()
+    manifest = json.loads((ROOT / "configs/tms_sites_sub-NTHC1035.json").read_text())
+    matches = [entry for entry in manifest["sites"] if entry["site"] == args.site]
+    if len(matches) != 1:
+        raise ValueError(f"Unknown or duplicated site: {args.site}")
+    task = matches[0]["task"]
+    subject_id = f"NTHC1035_{args.site.replace('-', '')}"
+    if args.site == "R-preSMA":
+        afni = PRESMA_AFNI
+        output = PRESMA_OUTPUT
+        afni_subject_id = "NTHC1035_presma"
+    else:
+        site_root = (
+            ROOT
+            / "results/empirical_tms_fmri_translation/afni/tms_sites_sub-NTHC1035"
+            / args.site
+        )
+        afni = site_root / f"{subject_id}.results"
+        output = site_root / "glm"
+        afni_subject_id = subject_id
+    events_path = (
+        ROOT
+        / "data/derived/ds005498_pilot_bids/sub-NTHC1035/ses-2/func"
+        / f"sub-NTHC1035_ses-2_task-{task}_events.tsv"
+    )
     output.mkdir(parents=True, exist_ok=True)
 
-    bold = nib.load(AFNI / "pb04.NTHC1035_presma.r01.scale+tlrc.HEAD")
+    bold = nib.load(afni / f"pb04.{afni_subject_id}.r01.scale+tlrc.HEAD")
     if bold.shape != (96, 114, 96, 164):
         raise ValueError(f"Unexpected preprocessed BOLD shape: {bold.shape}")
-    bold_nifti_path = output / "sub-NTHC1035_task-stim6x2x70_desc-scaled_bold.nii"
+    bold_nifti_path = output / f"sub-NTHC1035_task-{task}_desc-scaled_bold.nii"
     if not bold_nifti_path.exists():
         bold_nifti = nib.Nifti1Image(
             np.asanyarray(bold.dataobj, dtype=np.float32), bold.affine
         )
         bold_nifti.header.set_zooms((2.0, 2.0, 2.0, 2.4))
         nib.save(bold_nifti, bold_nifti_path)
-    extents_image = nib.load(AFNI / "mask_epi_extents+tlrc.HEAD")
+    extents_image = nib.load(afni / "mask_epi_extents+tlrc.HEAD")
     extents = np.squeeze(np.asanyarray(extents_image.dataobj)) > 0
     atlas = np.rint(
         np.asanyarray(
@@ -106,12 +128,12 @@ def main() -> None:
     mask = nib.Nifti1Image(mask_data.astype(np.uint8), extents_image.affine)
     nib.save(mask, output / "desc-corticalExtents_mask.nii.gz")
 
-    events = pd.read_csv(EVENTS, sep="\t")
+    events = pd.read_csv(events_path, sep="\t")
     events["onset"] = events["onset"].astype(float) - 7.2
     if len(events) != 68 or events["onset"].min() < 0:
         raise ValueError("Shifted event audit failed")
 
-    confounds, fd = afni_motion_confounds()
+    confounds, fd = afni_motion_confounds(afni)
     frame_times = np.arange(bold.shape[3], dtype=float) * 2.4
     design = build_tms_design(frame_times, events, confounds)
     audit = audit_tms_design(design)
@@ -131,12 +153,12 @@ def main() -> None:
     model.fit(bold_nifti_path, design_matrices=design)
     beta = model.compute_contrast("TMS_pulse", output_type="effect_size")
     z_map = model.compute_contrast("TMS_pulse", output_type="z_score")
-    nib.save(beta, output / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_beta.nii.gz")
-    nib.save(z_map, output / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_z.nii.gz")
+    nib.save(beta, output / f"sub-NTHC1035_task-{task}_desc-TMSpulse_beta.nii.gz")
+    nib.save(z_map, output / f"sub-NTHC1035_task-{task}_desc-TMSpulse_z.nii.gz")
 
     # Conservative sensitivity: restrict the fit to AFNI's intensity-derived
     # EPI/anatomy mask, which retains fewer but higher-TSNR target voxels.
-    auto_image = nib.load(AFNI / "mask_epi_anat.NTHC1035_presma+tlrc.HEAD")
+    auto_image = nib.load(afni / f"mask_epi_anat.{afni_subject_id}+tlrc.HEAD")
     auto_data = np.squeeze(np.asanyarray(auto_image.dataobj)) > 0
     auto_mask = nib.Nifti1Image(auto_data.astype(np.uint8), auto_image.affine)
     auto_model = FirstLevelModel(
@@ -154,16 +176,18 @@ def main() -> None:
     auto_z = auto_model.compute_contrast("TMS_pulse", output_type="z_score")
     nib.save(
         auto_beta,
-        output / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_mask-AFNIAuto_beta.nii.gz",
+        output / f"sub-NTHC1035_task-{task}_desc-TMSpulse_mask-AFNIAuto_beta.nii.gz",
     )
     nib.save(
         auto_z,
-        output / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_mask-AFNIAuto_z.nii.gz",
+        output / f"sub-NTHC1035_task-{task}_desc-TMSpulse_mask-AFNIAuto_z.nii.gz",
     )
     design.to_csv(output / "design_matrix.tsv", sep="\t", index=False)
     confounds.to_csv(output / "motion_confounds.tsv", sep="\t", index=False)
 
     result = {
+        "site": args.site,
+        "task": task,
         **audit.__dict__,
         "full_rank": audit.full_rank,
         "noise_model": "ar1",

@@ -1,0 +1,17 @@
+{
+  "subject": "NTHC1035",
+  "session": "ses-2",
+  "sites": [
+    {"site": "R-FP", "task": "stim24x60xMinus2", "sphere": "R-FP_Sphere_Bin.nii.gz"},
+    {"site": "L-FP", "task": "stimMinus24x60xMinus2", "sphere": "L-FP_Sphere_Bin.nii.gz"},
+    {"site": "R-FEF", "task": "stim34x6x62", "sphere": "R-FEF_Sphere_Bin.nii.gz"},
+    {"site": "R-IFJ", "task": "stim50x10x28", "sphere": "R-IFJ_Sphere_Bin.nii.gz"},
+    {"site": "R-IPL", "task": "stim48xMinus54x46", "sphere": "R-IPL_Sphere_Bin.nii.gz"},
+    {"site": "R-M1", "task": "stim40xMinus18x64", "sphere": "R-M1_Sphere_Bin.nii.gz"},
+    {"site": "R-preSMA", "task": "stim6x2x70", "sphere": "R-preSMA_Sphere_Bin.nii.gz"},
+    {"site": "R-aMFG", "task": "stim30x50x26", "sphere": "R-aMFG_Sphere_Bin.nii.gz"},
+    {"site": "L-pMFG", "task": "stimMinus38x22x48", "sphere": "L-pMFG_Sphere_Bin.nii.gz"},
+    {"site": "R-pMFG", "task": "stim46x26x38", "sphere": "R-pMFG_Sphere_Bin.nii.gz"},
+    {"site": "L-aMFG", "task": "stimMinus32x42x34", "sphere": "L-aMFG_Sphere_Bin.nii.gz"}
+  ]
+}

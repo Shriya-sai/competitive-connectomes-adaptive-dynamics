@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Apply the frozen spatial-response instrument to the AFNI pilot GLM."""
+"""Apply the frozen spatial-response instrument to any NTHC1035 TMS site."""
 
 from __future__ import annotations
 
 import json
+import argparse
 from pathlib import Path
 import sys
 
@@ -18,28 +19,48 @@ sys.path.insert(0, str(ROOT / "src"))
 from luppi_recreation.tms_spatial import measure_tms_spatial_response
 
 
-PILOT = (
+PRESMA_PILOT = (
     ROOT
     / "results/empirical_tms_fmri_translation/afni/tms_presma_sub-NTHC1035"
 )
-AFNI = PILOT / "NTHC1035_presma.results"
-GLM = PILOT / "glm"
 ATLAS = (
     ROOT
     / "data/atlases/templateflow/tpl-MNI152NLin2009cAsym"
     / "tpl-MNI152NLin2009cAsym_res-02_atlas-Schaefer2018_"
     "desc-100Parcels7Networks_dseg.nii.gz"
 )
-SPHERE = ROOT / "upstream/sptmsfmri/data/stim-sites/R-preSMA_Sphere_Bin.nii.gz"
+SPHERES = ROOT / "upstream/sptmsfmri/data/stim-sites"
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--site", default="R-preSMA")
+    args = parser.parse_args()
+    manifest = json.loads((ROOT / "configs/tms_sites_sub-NTHC1035.json").read_text())
+    matches = [entry for entry in manifest["sites"] if entry["site"] == args.site]
+    if len(matches) != 1:
+        raise ValueError(f"Unknown or duplicated site: {args.site}")
+    entry = matches[0]
+    task = entry["task"]
+    subject_id = f"NTHC1035_{args.site.replace('-', '')}"
+    if args.site == "R-preSMA":
+        pilot = PRESMA_PILOT
+        afni = pilot / "NTHC1035_presma.results"
+        afni_subject_id = "NTHC1035_presma"
+    else:
+        pilot = (
+            ROOT
+            / "results/empirical_tms_fmri_translation/afni/tms_sites_sub-NTHC1035"
+            / args.site
+        )
+        afni = pilot / f"{subject_id}.results"
+        afni_subject_id = subject_id
+    glm = pilot / "glm"
+    sphere_path = SPHERES / entry["sphere"]
     beta_image = nib.load(
-        GLM / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_beta.nii.gz"
+        glm / f"sub-NTHC1035_task-{task}_desc-TMSpulse_beta.nii.gz"
     )
-    z_image = nib.load(
-        GLM / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_z.nii.gz"
-    )
+    z_image = nib.load(glm / f"sub-NTHC1035_task-{task}_desc-TMSpulse_z.nii.gz")
     target = (beta_image.shape, beta_image.affine)
     beta = beta_image.get_fdata()
     z_map = z_image.get_fdata()
@@ -47,10 +68,10 @@ def main() -> None:
         np.asanyarray(resample_from_to(nib.load(ATLAS), target, order=0).dataobj)
     ).astype(int)
     sphere = (
-        np.asanyarray(resample_from_to(nib.load(SPHERE), target, order=0).dataobj)
+        np.asanyarray(resample_from_to(nib.load(sphere_path), target, order=0).dataobj)
         > 0.5
     )
-    coverage_image = nib.load(AFNI / "mask_epi_extents+tlrc.HEAD")
+    coverage_image = nib.load(afni / "mask_epi_extents+tlrc.HEAD")
     coverage = np.squeeze(np.asanyarray(coverage_image.dataobj)) > 0
 
     eligible_labels: list[int] = []
@@ -81,26 +102,25 @@ def main() -> None:
     local_z = z_map[local]
     auto_mask = np.squeeze(
         np.asanyarray(
-            nib.load(AFNI / "mask_epi_anat.NTHC1035_presma+tlrc.HEAD").dataobj
+            nib.load(afni / f"mask_epi_anat.{afni_subject_id}+tlrc.HEAD").dataobj
         )
     ) > 0
     auto_beta = nib.load(
-        GLM
-        / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_mask-AFNIAuto_beta.nii.gz"
+        glm / f"sub-NTHC1035_task-{task}_desc-TMSpulse_mask-AFNIAuto_beta.nii.gz"
     ).get_fdata()
     auto_z = nib.load(
-        GLM / "sub-NTHC1035_task-stim6x2x70_desc-TMSpulse_mask-AFNIAuto_z.nii.gz"
+        glm / f"sub-NTHC1035_task-{task}_desc-TMSpulse_mask-AFNIAuto_z.nii.gz"
     ).get_fdata()
     auto_local = sphere & (atlas > 0) & auto_mask
-    variance_line = nib.load(GLM / "variance_line_mask_mni.nii.gz").get_fdata() > 0
+    variance_line = nib.load(glm / "variance_line_mask_mni.nii.gz").get_fdata() > 0
     flagged_local = local & variance_line
     clean_local = local & ~variance_line
     if not np.any(clean_local):
         raise RuntimeError("Variance-line exclusion removed the entire target")
     result = {
         "subject": "sub-NTHC1035",
-        "run": "ses-2_task-stim6x2x70",
-        "target": "right preSMA",
+        "run": f"ses-2_task-{task}",
+        "target": args.site,
         "local_signed_beta": response.local_signed_beta,
         "local_absolute_beta": response.local_absolute_beta,
         "local_mean_z": float(np.mean(local_z)),
@@ -134,7 +154,7 @@ def main() -> None:
             label for label, fraction in parcel_coverage.items() if fraction < 0.80
         ),
     }
-    path = PILOT / "spatial_response.json"
+    path = pilot / "spatial_response.json"
     path.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
 
