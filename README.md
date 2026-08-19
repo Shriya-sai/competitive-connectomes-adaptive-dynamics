@@ -201,6 +201,16 @@ Frozen parameters live in `configs/`; interpretive reports live in `docs/`.
 - [`docs/EEG_CONFIRMATION_RESULTS.md`](docs/EEG_CONFIRMATION_RESULTS.md) — frozen EEG failure and audit
 - [`configs/upstream_version.txt`](configs/upstream_version.txt) — exact upstream provenance
 
+## Child NeuroAI project
+
+The biological and dynamical results developed here motivate the separate
+private project **Competitive Architectures for Brain-Inspired Deep Learning**.
+Its repository, [`competitive-architectures-neuroai`](https://github.com/Shriya-sai/competitive-architectures-neuroai),
+tests whether controlled artificial analogues of structured competition improve
+computation or brain alignment. The repositories remain independent so that the
+translation does not blur the evidential boundary between whole-brain modeling
+and DNN experiments.
+
 ## Citation and attribution
 
 This is an independent educational reproduction and extension, not an official
