@@ -20,25 +20,26 @@ The shared MATLAB timing file contains 68 continuous pulse onsets from 11.8 to 3
 
 ### FreeSurfer licence gate
 
-The FreeSurfer registration form repeatedly rejected its own reCAPTCHA. A
-development attempt with fMRIPrep's supported `--force no-bbr` option still
-failed: fMRIPrep 25.2.5 performs a global FreeSurfer licence check even when
-surface reconstruction and BBR are disabled. No synthetic or borrowed licence
-will be used. The standardized preprocessing route remains paused pending a
-licence issued by FreeSurfer support; event construction and model
-specification can proceed independently in the meantime.
+The FreeSurfer registration form initially rejected its own reCAPTCHA, and a
+development attempt with fMRIPrep's supported `--force no-bbr` option confirmed
+that fMRIPrep 25.2.5 performs a global licence check even when surface
+reconstruction and BBR are disabled. A valid personal FreeSurfer licence was
+obtained on 2026-08-20. It is stored locally, excluded from version control, and
+its read-only Docker mount has been verified. The pinned right-preSMA fMRIPrep
+pilot is ready to run; preprocessing success and visual QC have not yet been
+established.
 
 ### Licence-free volumetric contingency
 
-After the registration form, support email and subscribed mailing-list route
-failed to provide a licence, AFNI `26.1.04` was selected for a bounded
+While the licence was unavailable, AFNI `26.1.04` was selected for a bounded
 volumetric pilot. AFNI's `sswarper2` performs T1w skull stripping and nonlinear
 normalization to its `MNI152_2009_template_SSW` reference, which is derived from
 MNI152 nonlinear 2009c asymmetric space. The official AMD64 container is pinned
 by tag and runs through Docker emulation on the ARM64 host. Anatomical
 normalization is executed and visually quality-controlled before any functional
-workflow is specified or any TMS response is inspected. fMRIPrep remains the
-preferred sensitivity pipeline if a valid FreeSurfer licence is later issued.
+workflow is specified or any TMS response is inspected. fMRIPrep is now
+available as the preferred standardized sensitivity pipeline; the completed
+AFNI pilot remains an independent preprocessing comparison.
 
 #### Anatomical pilot result (sub-NTHC1035)
 

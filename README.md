@@ -12,8 +12,9 @@ localized perturbation remains local or propagates through the brain.
 
 The single-subject computational reproduction and mechanistic perturbation
 sequence are complete. An empirical TMS-fMRI translation is preregistered in
-code and undergoing pilot preprocessing. The empirical stage is not yet a
-confirmed result.
+code and undergoing pilot preprocessing. A FreeSurfer licence has now been
+obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
+empirical stage is not yet a confirmed result.
 
 Current test status: **43 passing tests**.
 
@@ -187,8 +188,9 @@ Frozen parameters live in `configs/`; interpretive reports live in `docs/`.
 - Core reproduction results use one released human subject.
 - Generative weights were jointly optimized; ablations demonstrate dependence
   within that solution, not uniqueness among all possible reoptimized models.
-- The empirical TMS-fMRI pilot is unfinished and cannot yet support the proposed
-  architecture–propagation association.
+- The empirical TMS-fMRI pilot is unfinished. The AFNI pilot is complete, while
+  the standardized fMRIPrep sensitivity run and multisite analysis remain to be
+  completed; no architecture–propagation association is yet supported.
 - No result currently establishes a causal link between cooperative–competitive
   whole-brain organization and human exploration–exploitation behaviour.
 
