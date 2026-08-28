@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite this repository and the original Luppi et al. article."
+title: "Competitive Connectomes and Adaptive Dynamics"
+type: software
+authors:
+  - given-names: Shriya
+    family-names: Sai
+repository-code: "https://github.com/Shriya-sai/competitive-connectomes-adaptive-dynamics"
+url: "https://github.com/Shriya-sai/competitive-connectomes-adaptive-dynamics"
+version: 0.1.0
+date-released: 2026-08-28
+license: MIT
+preferred-citation:
+  type: article
+  title: "Competitive interactions shape mammalian brain network dynamics and computation"
+  doi: "10.1038/s41593-026-02205-3"

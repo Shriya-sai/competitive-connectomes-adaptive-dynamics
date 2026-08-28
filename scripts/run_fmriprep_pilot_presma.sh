@@ -1,7 +1,8 @@
 #!/bin/zsh
 set -euo pipefail
 
-project="/Users/shriyasai/Documents/Luppi et al. Recreation"
+script_dir="${0:A:h}"
+project="${script_dir:h}"
 input="${project}/data/derived/ds005498_pilot_bids"
 output="${project}/results/empirical_tms_fmri_translation/fmriprep"
 work="${project}/build/fmriprep_work"

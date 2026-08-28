@@ -1,7 +1,8 @@
 #!/bin/zsh
 set -euo pipefail
 
-project="/Users/shriyasai/Documents/Luppi et al. Recreation"
+script_dir="${0:A:h}"
+project="${script_dir:h}"
 input="${project}/data/derived/ds005498_pilot_bids"
 template_dir="${project}/data/atlases/afni"
 output="${project}/results/empirical_tms_fmri_translation/afni/sswarper_sub-NTHC1035"
