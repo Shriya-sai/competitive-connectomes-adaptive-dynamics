@@ -47,16 +47,14 @@ class ExtractRegionalFrequenciesTests(unittest.TestCase):
     def test_matches_upstream_matlab_reference_for_released_data(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         upstream_root = project_root / "upstream" / "competitive-cooperative-hopf"
-        bold = loadmat(
-            upstream_root / "data" / "matlab" / "single" / "FMRI.mat"
-        )["FMRI"]
-        reference = loadmat(
-            upstream_root
-            / "data"
-            / "matlab"
-            / "debug"
-            / "debug_inputs.mat"
-        )["regionalFrequencies"].squeeze()
+        bold_path = upstream_root / "data" / "matlab" / "single" / "FMRI.mat"
+        reference_path = (
+            upstream_root / "data" / "matlab" / "debug" / "debug_inputs.mat"
+        )
+        if not bold_path.exists() or not reference_path.exists():
+            self.skipTest("upstream released data have not been cloned")
+        bold = loadmat(bold_path)["FMRI"]
+        reference = loadmat(reference_path)["regionalFrequencies"].squeeze()
 
         observed = extract_regional_frequencies(bold, repetition_time=0.72)
 

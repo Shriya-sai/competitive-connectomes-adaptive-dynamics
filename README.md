@@ -16,7 +16,7 @@ code and undergoing pilot preprocessing. A FreeSurfer licence has now been
 obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
 empirical stage is not yet a confirmed result.
 
-Current test status: **43 passing tests**.
+Current test status in a fully provisioned checkout: **43 passing tests**.
 
 ## What was reproduced
 
@@ -154,6 +154,10 @@ Run the complete automated suite:
 ```bash
 python -m pytest -q
 ```
+
+In a fresh clone, the three integration tests that require the separately
+cloned demonstration data and compiled Hopf extension are reported as skipped.
+After completing the upstream setup above, all 43 tests run.
 
 Initial reproduction sequence:
 

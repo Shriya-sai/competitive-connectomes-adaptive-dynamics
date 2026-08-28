@@ -9,10 +9,16 @@ from luppi_recreation.hopf_backend import load_hopf_extension
 
 
 class HopfBackendTests(unittest.TestCase):
-    def test_loads_extension_and_runs_tiny_simulation(self) -> None:
+    def setUp(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         upstream_root = project_root / "upstream" / "competitive-cooperative-hopf"
-        hopf = load_hopf_extension(upstream_root)
+        try:
+            self.hopf = load_hopf_extension(upstream_root)
+        except FileNotFoundError:
+            self.skipTest("upstream Hopf extension has not been built")
+
+    def test_loads_extension_and_runs_tiny_simulation(self) -> None:
+        hopf = self.hopf
 
         result = hopf.simulate(
             np.eye(3, dtype=np.float64) * 0.001,
@@ -28,9 +34,7 @@ class HopfBackendTests(unittest.TestCase):
         self.assertTrue(np.isfinite(result).all())
 
     def test_seed_controls_stochastic_simulation(self) -> None:
-        project_root = Path(__file__).resolve().parents[1]
-        upstream_root = project_root / "upstream" / "competitive-cooperative-hopf"
-        hopf = load_hopf_extension(upstream_root)
+        hopf = self.hopf
         connectivity = np.eye(3, dtype=np.float64) * 0.001
         frequencies = np.array([0.03, 0.04, 0.05], dtype=np.float64)
 
