@@ -16,7 +16,7 @@ code and undergoing pilot preprocessing. A FreeSurfer licence has now been
 obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
 empirical stage is not yet a confirmed result.
 
-Current test status in a fully provisioned checkout: **43 passing tests**.
+Current test status in a fully provisioned checkout: **45 passing tests**.
 
 ## What was reproduced
 
@@ -104,6 +104,7 @@ scripts/                Reproduction, null-model and validation entry points
 tests/                  Mathematical and regression tests
 configs/                Frozen experiment parameters and upstream provenance
 docs/                   Protocols, results, failures and progress reports
+ui/                     Dependency-free interactive perturbation explorer
 data/                   Local public datasets (ignored by Git)
 results/                Regenerable numerical outputs (ignored by Git)
 figures/                Regenerable figures (ignored by Git)
@@ -157,7 +158,7 @@ python -m pytest -q
 
 In a fresh clone, the three integration tests that require the separately
 cloned demonstration data and compiled Hopf extension are reported as skipped.
-After completing the upstream setup above, all 43 tests run.
+After completing the upstream setup above, all 45 tests run.
 
 Initial reproduction sequence:
 
@@ -172,6 +173,30 @@ python scripts/evaluate_frozen_gc.py
 The repository contains separate scripts for each null model, dynamical
 instrument, gain sweep, perturbation experiment and empirical-method audit.
 Frozen parameters live in `configs/`; interpretive reports live in `docs/`.
+
+## Interactive perturbation explorer
+
+The repository includes a static browser interface for comparing the four
+reference interaction architectures, stimulation targets, amplitudes and
+durations. It ships with 128 frozen response profiles aggregated from the
+paired 30-seed confirmation runs, so it works immediately after cloning:
+
+```bash
+python -m http.server 8000
+```
+
+Open `http://localhost:8000/ui/`. After reproducing the numerical analysis,
+regenerate the interface dataset with:
+
+```bash
+python scripts/export_brain_dynamics_ui.py
+```
+
+The interface deliberately uses a schematic bilateral layout because the
+released model does not provide atlas coordinates for this visualization. Its
+playback stages measured regional response amplitudes for inspection; it is not
+presented as a literal simulated time series. See [`ui/README.md`](ui/README.md)
+for the exact provenance and limitations.
 
 ## Reproducibility principles
 

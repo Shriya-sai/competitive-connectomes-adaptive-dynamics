@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive playback of frozen whole-brain Hopf perturbation results.">
+  <title>Competitive Connectomes Perturbation Explorer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">Competitive Connectomes</p>
+        <h1>Perturbation Explorer</h1>
+      </div>
+      <div class="status"><span id="status-dot"></span><span id="status-text">Loading frozen results</span></div>
+    </header>
+
+    <section class="workspace">
+      <aside class="controls" aria-label="Perturbation controls">
+        <label>Interaction architecture<select id="condition"></select></label>
+        <label>Target set<select id="site"></select></label>
+        <label>Pulse direction<select id="amplitude"></select></label>
+        <label>Duration<select id="duration"></select></label>
+        <button id="apply" type="button">Apply virtual perturbation</button>
+        <button id="pause" class="secondary" type="button">Pause playback</button>
+
+        <div class="legend" aria-label="Connection legend">
+          <span><i class="cooperative"></i> Cooperative</span>
+          <span><i class="competitive"></i> Competitive</span>
+          <span><i class="target"></i> Perturbed region</span>
+        </div>
+
+        <dl class="metrics">
+          <div><dt>Direct response</dt><dd id="direct">—</dd></div>
+          <div><dt>Propagation</dt><dd id="propagation">—</dd></div>
+          <div><dt>Reconfiguration</dt><dd id="reconfiguration">—</dd></div>
+          <div><dt>Recovery</dt><dd id="recovery">—</dd></div>
+        </dl>
+      </aside>
+
+      <section class="stage" aria-label="Interactive brain-network response">
+        <canvas id="brain" role="img" aria-label="Schematic bilateral network with animated regional response"></canvas>
+        <div class="stage-label">
+          <span id="phase">Ready</span>
+          <span>network-space layout · 100 regions</span>
+        </div>
+      </section>
+    </section>
+
+    <footer>
+      Median of 30 frozen paired confirmation seeds. Layout is schematic, not anatomical; playback encodes regional response amplitude, not literal simulation time.
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
