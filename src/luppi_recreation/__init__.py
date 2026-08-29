@@ -20,12 +20,6 @@ from .leida import (
     projective_angular_distances,
     summarize_leida_landscape,
 )
-from .recurrent_states import (
-    WindowedConnectivity,
-    adjusted_rand_index,
-    cluster_connectivity_states,
-    windowed_functional_connectivity,
-)
 
 __all__ = [
     "SingleSubjectData",
@@ -38,10 +32,6 @@ __all__ = [
     "load_single_subject",
     "phase_dynamics",
     "summarize_order_parameter",
-    "WindowedConnectivity",
-    "adjusted_rand_index",
-    "cluster_connectivity_states",
-    "windowed_functional_connectivity",
     "LeadingEigenvectorDynamics",
     "leading_phase_eigenvectors",
     "leida",

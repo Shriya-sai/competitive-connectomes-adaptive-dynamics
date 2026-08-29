@@ -26,6 +26,7 @@ figures/*
 
 # Local review intermediates
 tmp/
+.tmp*/
 
 # External research code is tracked by URL and commit in the provenance file.
 upstream/*/

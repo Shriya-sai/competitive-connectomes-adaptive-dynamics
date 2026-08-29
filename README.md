@@ -16,7 +16,7 @@ code and undergoing pilot preprocessing. A FreeSurfer licence has now been
 obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
 empirical stage is not yet a confirmed result.
 
-Current test status in a fully provisioned checkout: **47 passing tests**.
+Current test status in a fully provisioned checkout: **42 passing tests**.
 
 ## What was reproduced
 
@@ -66,18 +66,17 @@ synapses or that one fitted subject represents a population.
 
 ## Empirical validation route
 
-Several candidate bridges to adaptive behaviour were tested critically rather
-than selected post hoc:
+Several candidate bridges to adaptive behaviour were tested before the current
+route was selected:
 
 - A reversal-learning EEG endpoint failed its frozen confirmation gate. A
   subsequent synthetic audit showed that the original phase-departure metric
   could not distinguish genuine reconfiguration from ordinary oscillator drift.
   This was recorded as an instrument failure, not rewritten as a clean failure
   of the biological hypothesis.
-- Alternative phase, wPLI, LEiDA and covariance-geometry approaches were
-  compared. A short-horizon relative-phase predictor passed synthetic construct
-  validation, but the available empirical regime remained too restrictive for
-  the intended bridge.
+- A redesigned short-horizon relative-phase predictor passed synthetic
+  construct validation, but the available empirical regime remained too
+  restrictive for the intended bridge.
 - The current route uses public concurrent single-pulse TMS-fMRI
   ([OpenNeuro ds005498](https://doi.org/10.18112/openneuro.ds005498.v2.0.0)) to
   test whether independently estimated resting functional embedding predicts
@@ -93,7 +92,8 @@ Before inspecting processed TMS responses, the following were frozen and tested:
 3. Resting positive, negative, total-absolute and mixed-sign functional
    embedding, with mandatory global-signal-regression sensitivity analysis.
 
-The full frozen protocol is in
+The route-selection record and full frozen protocol are in
+[`docs/EMPIRICAL_ROUTE_SELECTION.md`](docs/EMPIRICAL_ROUTE_SELECTION.md) and
 [`docs/EMPIRICAL_TMS_FMRI_TRANSLATION_PROTOCOL.md`](docs/EMPIRICAL_TMS_FMRI_TRANSLATION_PROTOCOL.md).
 
 ## Repository structure
@@ -103,7 +103,7 @@ src/luppi_recreation/   Reusable analysis and measurement code
 scripts/                Reproduction, null-model and validation entry points
 tests/                  Mathematical and regression tests
 configs/                Frozen experiment parameters and upstream provenance
-docs/                   Protocols, results, failures and progress reports
+docs/                   Protocols, results and empirical-route decisions
 ui/                     Dependency-free interactive perturbation explorer
 data/                   Local public datasets (ignored by Git)
 results/                Regenerable numerical outputs (ignored by Git)
@@ -158,7 +158,7 @@ python -m pytest -q
 
 In a fresh clone, the three integration tests that require the separately
 cloned demonstration data and compiled Hopf extension are reported as skipped.
-After completing the upstream setup above, all 47 tests run.
+After completing the upstream setup above, all 42 tests run.
 
 Initial reproduction sequence:
 
@@ -171,7 +171,7 @@ python scripts/evaluate_frozen_gc.py
 ```
 
 The repository contains separate scripts for each null model, dynamical
-instrument, gain sweep, perturbation experiment and empirical-method audit.
+instrument, gain sweep, perturbation experiment and active empirical analysis.
 Frozen parameters live in `configs/`; interpretive reports live in `docs/`.
 
 ## Interactive perturbation explorer
@@ -225,11 +225,9 @@ See [`ui/README.md`](ui/README.md) for the exact provenance and limitations.
 
 ## Key documentation
 
-- [`PROJECT_OUTLINE.md`](PROJECT_OUTLINE.md) — phase-by-phase research history
-- [`docs/Competitive_Connectomes_Progress_Report.docx`](docs/Competitive_Connectomes_Progress_Report.docx) — detailed progress artifact
+- [`PROJECT_OUTLINE.md`](PROJECT_OUTLINE.md) — concise project roadmap
 - [`docs/HOPF_ARCHITECTURAL_ALLOCATION_RESULTS.md`](docs/HOPF_ARCHITECTURAL_ALLOCATION_RESULTS.md) — final mechanistic result
-- [`docs/CRITICAL_ROUTE_COMPARISON.md`](docs/CRITICAL_ROUTE_COMPARISON.md) — empirical-route comparison
-- [`docs/EEG_CONFIRMATION_RESULTS.md`](docs/EEG_CONFIRMATION_RESULTS.md) — frozen EEG failure and audit
+- [`docs/EMPIRICAL_ROUTE_SELECTION.md`](docs/EMPIRICAL_ROUTE_SELECTION.md) — rejected routes and current empirical rationale
 - [`configs/upstream_version.txt`](configs/upstream_version.txt) — exact upstream provenance
 
 ## Child NeuroAI project
