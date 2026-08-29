@@ -16,7 +16,7 @@ code and undergoing pilot preprocessing. A FreeSurfer licence has now been
 obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
 empirical stage is not yet a confirmed result.
 
-Current test status in a fully provisioned checkout: **45 passing tests**.
+Current test status in a fully provisioned checkout: **47 passing tests**.
 
 ## What was reproduced
 
@@ -158,7 +158,7 @@ python -m pytest -q
 
 In a fresh clone, the three integration tests that require the separately
 cloned demonstration data and compiled Hopf extension are reported as skipped.
-After completing the upstream setup above, all 45 tests run.
+After completing the upstream setup above, all 47 tests run.
 
 Initial reproduction sequence:
 
@@ -194,9 +194,9 @@ python scripts/export_brain_dynamics_ui.py
 
 The interface deliberately uses a schematic bilateral layout because the
 released model does not provide atlas coordinates for this visualization. Its
-playback stages measured regional response amplitudes for inspection; it is not
-presented as a literal simulated time series. See [`ui/README.md`](ui/README.md)
-for the exact provenance and limitations.
+playback is the actual paired intervention-minus-control trajectory from frozen
+confirmation seed 300; the displayed summary metrics remain 30-seed medians.
+See [`ui/README.md`](ui/README.md) for the exact provenance and limitations.
 
 ## Reproducibility principles
 

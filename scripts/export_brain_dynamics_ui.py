@@ -10,6 +10,8 @@ from pathlib import Path
 
 import numpy as np
 
+from luppi_recreation import load_hopf_extension
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/hopf_perturbation_response.json"
@@ -17,6 +19,9 @@ MODEL = ROOT / "results/single_subject_optimization/signed.npz"
 RUNS = ROOT / "results/hopf_perturbation_response/confirmation/confirmation_pairs.csv"
 PROFILES = ROOT / "results/hopf_perturbation_response/confirmation/regional_response_profiles.npz"
 OUTPUT = ROOT / "ui/data/brain-dynamics-demo.json"
+TRAJECTORY_OUTPUT = ROOT / "ui/data/brain-dynamics-trajectories.json"
+UPSTREAM = ROOT / "upstream/competitive-cooperative-hopf"
+TRAJECTORY_SEED = 300
 
 REFERENCE_CONDITIONS = {
     (0.0, 0.0): "uncoupled",
@@ -138,14 +143,82 @@ def build_payload(
     }
 
 
+def sampled_indices(pre: int, pulse: int, recovery: int) -> np.ndarray:
+    """Keep a short baseline and the full pulse, then sample recovery at 2.88 s."""
+    baseline = np.append(np.arange(max(0, pre - 14), pre, 2), pre - 1)
+    pulse_window = np.arange(pre, pre + pulse)
+    recovery_window = np.arange(pre + pulse, pre + pulse + recovery, 4)
+    return np.unique(np.concatenate((baseline, pulse_window, recovery_window)))
+
+
+def quantize_trajectory(delta: np.ndarray) -> tuple[float, list[int]]:
+    """Encode a trajectory as signed 16-bit units with a recorded scale."""
+    scale = float(np.max(np.abs(delta)))
+    if scale == 0:
+        return 0.0, [0] * delta.size
+    encoded = np.rint(delta / scale * 32767).astype(np.int16)
+    return scale, encoded.T.reshape(-1).astype(int).tolist()
+
+
+def build_trajectories(
+    connectivity: np.ndarray,
+    frequencies: np.ndarray,
+    config: dict[str, object],
+) -> dict[str, object]:
+    """Run one untouched confirmation seed for literal intervention-control playback."""
+    positive, negative = np.clip(connectivity, 0, None), np.clip(connectivity, None, 0)
+    hopf = load_hopf_extension(UPSTREAM)
+    tr = float(config["model"]["repetition_time_seconds"])
+    pre = int(round(config["simulation_schedule"]["recorded_preperturbation_seconds"] / tr))
+    recovery = int(round(config["simulation_schedule"]["recorded_recovery_seconds"] / tr))
+    records = []
+    sites = config["perturbations"]["resolved_zero_based_site_sets"]
+    total = len(REFERENCE_CONDITIONS) * len(sites) * len(config["perturbations"]["duration_seconds"]) * len(config["perturbations"]["delta_a"])
+    completed = 0
+    for gains, condition in REFERENCE_CONDITIONS.items():
+        signed_model = gains[0] * positive + gains[1] * negative
+        for site, regions in sites.items():
+            mask = np.zeros(connectivity.shape[0]); mask[regions] = 1.0
+            for duration in config["perturbations"]["duration_seconds"]:
+                pulse = int(round(duration / tr))
+                indices = sampled_indices(pre, pulse, recovery)
+                times = np.round((indices - pre) * tr, 3).tolist()
+                for amplitude in config["perturbations"]["delta_a"]:
+                    control, intervention = hopf.simulate_paired_perturbation(
+                        signed_model, frequencies, mask, pre, pulse, recovery, tr,
+                        config["model"]["noise_strength"],
+                        config["model"]["baseline_bifurcation_parameter"],
+                        amplitude,
+                        config["simulation_schedule"]["discarded_burn_in_seconds"],
+                        config["model"]["noise_type"], TRAJECTORY_SEED,
+                    )
+                    delta = np.asarray(intervention)[:, indices] - np.asarray(control)[:, indices]
+                    scale, values = quantize_trajectory(delta)
+                    records.append({"condition": condition, "site": site,
+                        "duration_seconds": duration, "amplitude": amplitude,
+                        "times_seconds": times, "scale": scale,
+                        "values_int16_time_major": values})
+                    completed += 1
+                    if completed % 16 == 0:
+                        print(f"generated {completed}/{total} literal trajectories", flush=True)
+    return {"schema_version": "1.0.0", "seed": TRAJECTORY_SEED,
+        "quantity": "intervention minus paired control BOLD signal",
+        "sampling": "full pulse; recovery every four TRs; short pre-pulse identity context",
+        "quantization": "int16 values multiplied by scale/32767",
+        "regions": connectivity.shape[0], "trajectories": records}
+
+
 def main() -> None:
     config = json.loads(CONFIG.read_text())
-    connectivity = np.load(MODEL)["generative_connectivity"]
+    model = np.load(MODEL)
+    connectivity = model["generative_connectivity"]
     rows = list(csv.DictReader(RUNS.open()))
     profiles = np.load(PROFILES)["profiles"]
     payload = build_payload(connectivity, rows, profiles, config)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(payload, separators=(",", ":")) + "\n")
+    trajectories = build_trajectories(connectivity, model["regional_frequencies"], config)
+    TRAJECTORY_OUTPUT.write_text(json.dumps(trajectories, separators=(",", ":")) + "\n")
     print(
         f"Wrote {len(payload['nodes'])} regions, {len(payload['edges'])} edges, "
         f"and {len(payload['responses'])} response profiles to {OUTPUT}"

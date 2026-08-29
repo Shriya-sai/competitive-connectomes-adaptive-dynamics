@@ -29,7 +29,9 @@
         <div class="legend" aria-label="Connection legend">
           <span><i class="cooperative"></i> Cooperative</span>
           <span><i class="competitive"></i> Competitive</span>
-          <span><i class="target"></i> Perturbed region</span>
+          <span><i class="positive-response"></i> Positive ΔBOLD</span>
+          <span><i class="negative-response"></i> Negative ΔBOLD</span>
+          <span><i class="target"></i> Perturbed-region ring</span>
         </div>
 
         <dl class="metrics">
@@ -44,13 +46,14 @@
         <canvas id="brain" role="img" aria-label="Schematic bilateral network with animated regional response"></canvas>
         <div class="stage-label">
           <span id="phase">Ready</span>
+          <span><span id="time">t = 0.00 s</span> · 8× model time</span>
           <span>network-space layout · 100 regions</span>
         </div>
       </section>
     </section>
 
     <footer>
-      Median of 30 frozen paired confirmation seeds. Layout is schematic, not anatomical; playback encodes regional response amplitude, not literal simulation time.
+      Metrics are medians of 30 paired seeds. Playback is the literal intervention-minus-control trajectory for frozen confirmation seed 300. Layout is schematic, not anatomical.
     </footer>
   </main>
   <script src="app.js"></script>

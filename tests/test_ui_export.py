@@ -1,6 +1,6 @@
 import numpy as np
 
-from scripts.export_brain_dynamics_ui import build_payload, schematic_positions
+from scripts.export_brain_dynamics_ui import build_payload, quantize_trajectory, sampled_indices, schematic_positions
 
 
 def test_schematic_positions_are_deterministic_and_bounded() -> None:
@@ -45,3 +45,19 @@ def test_ui_payload_aggregates_only_reference_conditions() -> None:
     assert len(payload["responses"]) == 1
     assert payload["responses"][0]["condition"] == "fitted-signed"
     assert payload["responses"][0]["regional_response"] == [1.0, 2.0]
+
+
+def test_literal_trajectory_sampling_preserves_pulse_boundaries() -> None:
+    indices = sampled_indices(pre=100, pulse=10, recovery=200)
+    assert 99 in indices
+    assert list(indices[(indices >= 100) & (indices < 110)]) == list(range(100, 110))
+    assert 110 in indices
+    assert indices[-1] < 310
+
+
+def test_trajectory_quantization_has_bounded_error() -> None:
+    trajectory = np.array([[0.0, -0.2, 0.5], [0.1, -0.5, 0.3]])
+    scale, values = quantize_trajectory(trajectory)
+    restored = np.asarray(values).reshape(trajectory.shape[1], trajectory.shape[0]).T * scale / 32767
+    assert scale == 0.5
+    assert np.max(np.abs(restored - trajectory)) <= scale / 32767
