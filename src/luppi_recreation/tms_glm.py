@@ -56,6 +56,11 @@ def build_tms_design(
     if not required_events.issubset(events.columns):
         raise ValueError(f"events must contain {sorted(required_events)}")
 
+    events = events.copy()
+    # The source dataset uses both spellings for the same TMS event across
+    # runs. Canonicalize them so every site uses the frozen contrast name.
+    events["trial_type"] = events["trial_type"].replace({"TMSpulse": "TMS_pulse"})
+
     nuisance = confounds.loc[:, MOTION_COLUMNS].fillna(0.0).astype(float).copy()
     fd = confounds["framewise_displacement"].fillna(0.0).to_numpy(float)
     flagged = set(np.flatnonzero(fd > fd_threshold_mm).tolist())

@@ -92,6 +92,16 @@ Before inspecting processed TMS responses, the following were frozen and tested:
 3. Resting positive, negative, total-absolute and mixed-sign functional
    embedding, with mandatory global-signal-regression sensitivity analysis.
 
+The final participant gate applied that frozen analysis to all 11 stimulation
+sites in NTHC1035. Ten runs passed motion QC (R-IPL was flagged at 44/164
+censored volumes), but none showed a detectable local or remote response at the
+frozen remote `|mean z| >= 3.1` threshold; local means were also far below that
+same conservative criterion. The resting-embedding association was
+therefore not attempted: without a detected perturbational response, there was
+no defensible propagation outcome to explain. This closes the empirical route
+as an informative pilot failure rather than evidence against the biological
+hypothesis.
+
 The route-selection record and full frozen protocol are in
 [`docs/EMPIRICAL_ROUTE_SELECTION.md`](docs/EMPIRICAL_ROUTE_SELECTION.md) and
 [`docs/EMPIRICAL_TMS_FMRI_TRANSLATION_PROTOCOL.md`](docs/EMPIRICAL_TMS_FMRI_TRANSLATION_PROTOCOL.md).
@@ -217,9 +227,9 @@ See [`ui/README.md`](ui/README.md) for the exact provenance and limitations.
 - Core reproduction results use one released human subject.
 - Generative weights were jointly optimized; ablations demonstrate dependence
   within that solution, not uniqueness among all possible reoptimized models.
-- The empirical TMS-fMRI pilot is unfinished. The AFNI pilot is complete, while
-  the standardized fMRIPrep sensitivity run and multisite analysis remain to be
-  completed; no architecture–propagation association is yet supported.
+- The empirical TMS-fMRI route ended at its prespecified participant gate: no
+  local or remote TMS response was detectable across the 10 motion-QC-passing
+  sites, so no architecture–propagation association could be tested.
 - No result currently establishes a causal link between cooperative–competitive
   whole-brain organization and human exploration–exploitation behaviour.
 

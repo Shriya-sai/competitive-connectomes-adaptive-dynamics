@@ -47,6 +47,13 @@ class TmsGlmTests(unittest.TestCase):
         recovered = estimate_ols_contrasts(design, signal)
         np.testing.assert_allclose(recovered, true_effect, atol=0.03)
 
+    def test_source_event_spelling_is_canonicalized(self) -> None:
+        events = self.events.copy()
+        events["trial_type"] = "TMSpulse"
+        design = build_tms_design(self.frame_times, events, self.confounds)
+        self.assertIn("TMS_pulse", design.columns)
+        self.assertNotIn("TMSpulse", design.columns)
+
     def test_missing_motion_parameter_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "missing frozen motion confounds"):
             build_tms_design(
