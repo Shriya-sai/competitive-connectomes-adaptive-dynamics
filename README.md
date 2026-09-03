@@ -11,12 +11,13 @@ localized perturbation remains local or propagates through the brain.
 ## Project status
 
 The single-subject computational reproduction and mechanistic perturbation
-sequence are complete. An empirical TMS-fMRI translation is preregistered in
-code and undergoing pilot preprocessing. A FreeSurfer licence has now been
-obtained and the pinned fMRIPrep right-preSMA pilot is ready to run. The
-empirical stage is not yet a confirmed result.
+sequence are complete. The empirical TMS-fMRI translation was taken through
+its frozen 11-site participant gate and then stopped: none of the 10
+motion-QC-passing sites showed a detectable local or remote response. The
+repository therefore closes this route as an informative pilot failure, not as
+evidence against the biological hypothesis.
 
-Current test status in a fully provisioned checkout: **42 passing tests**.
+Current test status in a fully provisioned checkout: **43 passing tests**.
 
 ## What was reproduced
 
