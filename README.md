@@ -10,6 +10,27 @@ localized perturbation remains local or propagates through the brain.
 
 ## Project status
 
+### Three computational findings
+
+| Finding | Evidence | Scope |
+| --- | --- | --- |
+| Signed interactions improved FC fit | Mean correlation 0.677 versus 0.482 for cooperation alone | 30 matched simulations of one fitted subject |
+| Both signs and their placement mattered | Strength, placement and sign-map nulls degraded fit | Dependence within the fitted solution |
+| Local response and remote propagation dissociated | Target embedding and competitive pathways changed broadcasting | Controlled model perturbations |
+
+```mermaid
+flowchart LR
+    A[Single-subject Hopf reproduction] --> B[Weight and sign null models]
+    B --> C[Controlled perturbations]
+    C --> D[Completed computational contribution]
+    C -. Empirical translation .-> E[TMS-fMRI participant gate]
+    E --> F[Closed pilot: response not detected]
+```
+
+[Quick smoke experiment](#quick-smoke-experiment) ·
+[Interactive explorer](https://Shriya-sai.github.io/competitive-connectomes-adaptive-dynamics/) ·
+[Computational release](https://github.com/Shriya-sai/competitive-connectomes-adaptive-dynamics/releases/tag/v0.1.0)
+
 The single-subject computational reproduction and mechanistic perturbation
 sequence are complete. The empirical TMS-fMRI translation was taken through
 its frozen 11-site participant gate and then stopped: none of the 10
@@ -65,7 +86,7 @@ strengths and anatomical assignments form an interdependent fitted organization.
 This does **not** establish that negative effective weights are inhibitory
 synapses or that one fitted subject represents a population.
 
-## Empirical validation route
+## Closed empirical pilot
 
 Several candidate bridges to adaptive behaviour were tested before the current
 route was selected:
@@ -78,7 +99,7 @@ route was selected:
 - A redesigned short-horizon relative-phase predictor passed synthetic
   construct validation, but the available empirical regime remained too
   restrictive for the intended bridge.
-- The current route uses public concurrent single-pulse TMS-fMRI
+- The final route used public concurrent single-pulse TMS-fMRI
   ([OpenNeuro ds005498](https://doi.org/10.18112/openneuro.ds005498.v2.0.0)) to
   test whether independently estimated resting functional embedding predicts
   local susceptibility versus remote propagation.
@@ -125,7 +146,25 @@ upstream/               External repositories pinned by commit (ignored by Git)
 Raw public datasets, virtual environments, compiled binaries, preprocessing
 work directories and software licences are intentionally excluded from Git.
 
-## Installation
+## Quick smoke experiment
+
+With Python 3.12, install the package from the repository root and run:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python scripts/smoke_experiment.py
+```
+
+This deterministic synthetic experiment checks the phase measurement instrument
+on synchronized, dispersed and switching signals, then verifies that a signed
+network null preserves connection magnitudes. It prints measurements and exits
+with an error if an expected property fails. No dataset, C++ build, Docker or
+MATLAB is needed. It verifies core instruments; reproducing the fitted-subject
+findings requires the upstream setup below.
+
+## Full reproduction installation
 
 Requirements:
 
@@ -169,7 +208,7 @@ python -m pytest -q
 
 In a fresh clone, the three integration tests that require the separately
 cloned demonstration data and compiled Hopf extension are reported as skipped.
-After completing the upstream setup above, all 42 tests run.
+After completing the upstream setup above, all 43 tests run.
 
 Initial reproduction sequence:
 

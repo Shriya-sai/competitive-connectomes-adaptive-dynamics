@@ -23,7 +23,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8,<9",
+    "ruff>=0.9,<1",
 ]
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]
 
 [project.urls]
 Repository = "https://github.com/Shriya-sai/competitive-connectomes-adaptive-dynamics"
