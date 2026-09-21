@@ -1,5 +1,7 @@
 # Perturbation Explorer
 
+[Open the deployed explorer](https://shriya-sai.github.io/competitive-connectomes-adaptive-dynamics/).
+
 A dependency-free browser interface for exploring the frozen whole-brain Hopf
 perturbation results. The committed JSON contains median regional response
 profiles for 128 experimental conditions derived from 15,360 paired
@@ -16,10 +18,10 @@ python scripts/export_brain_dynamics_ui.py
 Run the interface from the repository root:
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --bind 127.0.0.1 --directory ui
 ```
 
-Open `http://localhost:8000/ui/`.
+Open `http://127.0.0.1:8000/`.
 
 The bilateral node layout is deterministic and schematic; it is not an
 anatomical atlas projection. Playback is literal model time: every pulse sample

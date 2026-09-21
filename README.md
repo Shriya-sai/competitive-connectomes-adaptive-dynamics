@@ -232,10 +232,10 @@ durations. It ships with 128 frozen response profiles aggregated from the
 paired 30-seed confirmation runs, so it works immediately after cloning:
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --bind 127.0.0.1 --directory ui
 ```
 
-Open `http://localhost:8000/ui/`. After reproducing the numerical analysis,
+Open `http://127.0.0.1:8000/`. After reproducing the numerical analysis,
 regenerate the interface dataset with:
 
 ```bash
